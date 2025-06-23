@@ -1,0 +1,187 @@
+/* TABLAS */
+.users-title {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 24px;
+    color: #333;
+}
+
+.users-table {
+    width: 80%;
+    margin: 40px auto;
+    border-collapse: collapse;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.users-table th {
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 12px 20px;
+    text-align: left;
+    border: 2px solid #e0e0e0;
+    text-align: center;
+}
+
+.users-table td {
+    padding: 12px 20px;
+    border: 1px solid #e0e0e0;
+    color: #555;
+    text-align: center;
+}
+
+/* BOTON DE SOLICITUDES */
+.fill-hover-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-weight: bold;
+  color: #333;
+  background: transparent;
+  border: 2px solid #333;
+  overflow: hidden;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.fill-hover-button::before {
+  content: '';
+  position: absolute;
+  background-color: #333;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  z-index: 0;
+  transition: width 0.3s ease;
+}
+
+.fill-hover-button:hover::before {
+  width: 100%;
+}
+
+.fill-hover-button:hover {
+  color: white;
+}
+
+.fill-hover-button svg {
+  z-index: 1;
+}
+
+.fill-hover-button span, 
+.fill-hover-button svg {
+  transition: color 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.ruta {
+  border: none;
+}
+
+/* BUSCARDOR */
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  position: relative;
+  max-width: 250px;
+}
+
+.search-bar label.text {
+  font-size: 0.75rem;
+  color: #818CF8;
+  font-weight: 700;
+  position: relative;
+  top: 0.5rem;
+  margin: 0 0 0 7px;
+  padding: 0 3px;
+  background: #ffffff;
+  width: fit-content;
+}
+
+.search-bar input[type=text].input {
+  padding: 11px 10px;
+  font-size: 0.75rem;
+  border: 2px #818CF8 solid;
+  border-radius: 5px;
+  background: #ffffff;
+}
+
+/* BOTON DE CAMBIO DE RUTAS */
+.cssbuttons-io-button {
+  background: #7099f0;
+  color: white;
+  font-family: inherit;
+  padding: 0.35em;
+  padding-left: 1.2em;
+  font-size: 17px;
+  font-weight: 500;
+  border-radius: 0.9em;
+  border: none;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 1.6em -0.6em #6ba64d;
+  overflow: hidden;
+  position: relative;
+  height: 2.8em;
+  padding-right: 3.3em;
+  cursor: pointer;
+}
+
+.cssbuttons-io-button .icon {
+  background: white;
+  margin-left: 1em;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.2em;
+  width: 2.2em;
+  border-radius: 0.7em;
+  box-shadow: 0.1em 0.1em 0.6em 0.2em #cde4f5;
+  right: 0.3em;
+  transition: all 0.3s;
+}
+
+.cssbuttons-io-button:hover .icon {
+  width: calc(100% - 0.6em);
+}
+
+.cssbuttons-io-button .icon svg {
+  width: 1.1em;
+  transition: transform 0.3s;
+  color: #060dbe;
+}
+
+.cssbuttons-io-button:hover .icon svg {
+  transform: translateX(0.1em);
+}
+
+.cssbuttons-io-button:active .icon {
+  transform: scale(0.95);
+}
+
+/* SLIDER PARA LAS RUTAS */
+.main-slider-container {
+  width: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.slider2 {
+  display: flex;
+  flex-direction: row;
+  width: 200vw;
+  transition: transform 0.5s ease-in-out;
+}
+
+.container-route {
+  width: 100vw;
+  flex-shrink: 0;
+  padding: 1rem;
+  box-sizing: border-box;
+}

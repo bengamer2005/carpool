@@ -1,0 +1,193 @@
+.input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  width: 38.5%;
+  padding: 0.5em;
+  border: 2px solid transparent;
+  background-color: #dadada;
+  border-radius: 10px;
+  transition: all 0.5s;
+}
+
+.input1 {
+  border: 2px solid transparent;
+  width: 80%;
+  height: 2rem;
+  outline: none;
+  overflow: hidden;
+  background-color: #dadada;
+  border-radius: 10px;
+  transition: all 0.5s;
+}
+
+.input2 {
+  border: none;
+  padding-left: 0.8em;
+  outline: none;
+  background-color: transparent;
+  border-radius: 6px;
+  transition: background-color 0.5s;
+  width: 73%;
+}
+
+.input3 {
+  width: 41.0%;
+}
+
+.input4 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  width: 80%;
+  height: 60px;
+  padding: 0.5em;
+  border: 2px solid transparent;
+  background-color: #dadada;
+  border-radius: 10px;
+  transition: all 0.5s;
+  resize: vertical
+}
+
+.input:hover,
+.input:focus-within {
+  border: 2px solid #4A9DEC;
+  box-shadow: 0px 0px 0px 7px rgba(74, 157, 236, 0.2);
+  background-color: white;
+}
+
+.input:hover .input2,
+.input:focus-within .input2 {
+  background-color: white;
+}
+
+.input4:hover,
+.input4:focus-within {
+  border: 2px solid #4A9DEC;
+  box-shadow: 0px 0px 0px 7px rgba(74, 157, 236, 0.2);
+  background-color: white;
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1em;
+  width: 100%;
+  padding-bottom: 2%;
+}
+
+.input-container2 {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1em;
+  width: 100%;
+  padding-bottom: 2%;
+  padding-top: 2%;
+}
+
+/* BOTON PARA AGREGAR RUTA */
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1em;
+  width: 100%;
+}
+
+.button {
+  --main-focus: #2d8cf0;
+  --font-color: #323232;
+  --bg-color-sub: #dedede;
+  --bg-color: #eee;
+  --main-color: #323232;
+
+  position: relative;
+  width: 260px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.button, .button__icon, .button__text {
+  transition: all 0.3s ease;
+}
+
+.button .button__text {
+  transform: translateX(22px);
+  color: var(--font-color);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.button .button__icon {
+  position: absolute;
+  transform: translateX(175px);
+  width: 39px;
+  background-color: var(--bg-color-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.button .svg {
+  width: 20px;
+  fill: var(--main-color);
+}
+
+.button:hover {
+  background: var(--bg-color);
+}
+
+.button:hover .button__text {
+  color: transparent;
+}
+
+.button:hover .button__icon {
+  width: 260px;
+  transform: translateX(0);
+}
+
+.button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px var(--main-color);
+}
+
+.button-change-route {
+  background-color: #f0f0f0;
+  transition: background-color 0.3s ease;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 8px;
+}
+
+.button-change-route:hover {
+  background-color: #dddddd;
+  cursor: pointer;
+}
+
+.button-padding {
+  padding-left: 1%;
+}
+
+/* CENTRAR COSAS */
+.center {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-bottom: 2%;
+}
+
+.center-text {
+  text-align: center;
+}
