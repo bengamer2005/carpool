@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 // servicios
-import { getGoingRoutes, getReturnRoutes } from "../services/handleRouteType" 
+import { getGoingRoutes, getReturnRoutes } from "../services/passengerService" 
 // componentes
 import RouteTable from "../components/routesTable"
 
@@ -9,19 +9,23 @@ const Drivers = () => {
     const [search, setSearch] = useState("")
     const [showReturn, setShowReturn] = useState(false)
     
-    const { data: driversGoing = [], isLoading: loadingGoing, error: errorGoing, refetch: refetchGoing} = useQuery({
+    // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query de las de ida
+    const { data: driversGoing = [], refetch: refetchGoing} = useQuery({
         queryKey: ["goingRoutes"],
         queryFn: getGoingRoutes
     })
 
-    const { data: driversReturn = [], isLoading: loadingReturn, error: errorReturn, refetch: refetchReturn} = useQuery({
+    // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query de las de regreso
+    const { data: driversReturn = [], refetch: refetchReturn} = useQuery({
         queryKey: ["returnRoutes"],
         queryFn: getReturnRoutes
     })
 
+    // hacemos la logica del buscador para ambos ida y regreso 
     const valueToSearch = driversGoing.filter((driver) => {
-        const value = search.toLowerCase()
+        const value = search.toLowerCase().trim()
 
+        // buscamos en todas las columnas de la tabla de ida
         return (
             driver.name.toLowerCase().includes(value) || 
             driver.startingPoint.toLowerCase().includes(value) || 
@@ -32,8 +36,9 @@ const Drivers = () => {
     })
 
     const valueToSearchReturn = driversReturn.filter((driver) => {
-        const value = search.toLowerCase()
+        const value = search.toLowerCase().trim()
 
+        // buscamos en todas las columnas de la tabla de regreso
         return (
             driver.name.toLowerCase().includes(value) || 
             driver.startingPoint.toLowerCase().includes(value) || 
@@ -45,13 +50,17 @@ const Drivers = () => {
 
     return (
         <div className="main-slider-container">
-            <div className="slider2" style={{ transform: showReturn ? 'translateX(-100vw)' : 'translateX(0)' }}>
+            
+            {/* si showReturn es true se traslada -50% para mostarar la otra tabla escondida*/}
+            <div className="slider2" style={{ transform: showReturn ? 'translateX(-50%)' : 'translateX(0)' }}>
 
                 <div className="container-route">
                     <h2 className="title-routeStart">CONDUCTORES DISPONIBLES DE ENTRADA</h2>
                     
                     <div className="route-container">
                         <div className="car-full">
+                            
+                            {/* le asignamos al boton setShowReturn a true, y le asignamos un refetch a las rutas de regreso */}
                             <button className="cssbuttons-io-button" onClick={() => {setShowReturn(true), refetchReturn()}}>
                                 Ver rutas de salida
                                 <div className="icon">
@@ -63,13 +72,15 @@ const Drivers = () => {
                             </button>
                         </div>
 
+                        {/* inpput para buscar */}
                         <div className="search-bar">
-                            <label htmlFor="input" className="text">Buscar:</label>
-                            <input type="text" name="input" className="input" placeholder="Escribe algo..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ marginBottom: "1rem", padding: "0.5rem", width: "87%" }}/>
+                            <label htmlFor="input-search" className="text-search">Buscar:</label>
+                            <input type="text" name="input-search" className="input-search" placeholder="Escribe algo..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ marginBottom: "1rem", padding: "0.5rem", width: "87%" }}/>
                         </div>
                     </div>
 
-                    <RouteTable drivers={valueToSearch}/>
+                    {/* se llama al componente RouteTable y se llena con valueToSearch */}
+                    <RouteTable drivers={valueToSearch} refetch={refetchGoing}/>
                 </div>
 
                 <div className="container-route">
@@ -77,6 +88,8 @@ const Drivers = () => {
                     
                     <div className="route-container">
                         <div className="car-full">
+
+                            {/* le asignamos al boton setShowReturn a false, y le asignamos un refetch a las rutas de ida */}
                             <button className="cssbuttons-io-button" onClick={() => {setShowReturn(false), refetchGoing()}} >
                                 Ver rutas de entrada
                                 <div className="icon">
@@ -88,14 +101,16 @@ const Drivers = () => {
                             </button>
                         </div>
 
+                        {/* inpput para buscar */}
                         <div className="search-bar">
-                            <label htmlFor="input" className="text">Buscar:</label>
-                            <input type="text" name="input" className="input" placeholder="Escribe algo..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ marginBottom: "1rem", padding: "0.5rem", width: "87%" }}/>
+                            <label htmlFor="input-search" className="text-search">Buscar:</label>
+                            <input type="text" name="input-search" className="input-search" placeholder="Escribe algo..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ marginBottom: "1rem", padding: "0.5rem", width: "87%" }}/>
                         </div>
 
                     </div>
 
-                    <RouteTable drivers={valueToSearchReturn}/>
+                    {/* se llama al componente RouteTable y se llena con valueToSearchReturn */}
+                    <RouteTable drivers={valueToSearchReturn} refetch={refetchReturn}/>
                 </div>
             </div>
         </div>

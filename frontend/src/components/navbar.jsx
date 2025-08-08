@@ -5,10 +5,13 @@ const Navbar = () => {
     const changePage = useNavigate()
     const page = useLocation()
 
+    // se crean las constantes con las rutas de los apartados pasajero / conductor
     const pageDriver = page.pathname === "/conductor"
     const pagePassenger = page.pathname === "/pasajero"
 
     const handleRole = async (role, rolePage) => {
+
+        // se usa swal para preguntar el cambio de roles
         const changeRole = await Swal.fire({
             title: "CAMBIO DE ROL",
             text: `¿Quieres cambiar al rol de ${role === "driver" ? "PASAJERO" : "CONDUCTOR"}?`,
@@ -18,10 +21,12 @@ const Navbar = () => {
             cancelButtonText: "cancelar"
         })
 
+        // si no se comfirma no hace nada
         if(!changeRole.isConfirmed) {
             return null
         }
 
+        // intentamos hacer el cambio de rol
         try {
             const response = await fetch(`http://localhost:3000/carpool/${role}/changeStatus`, {
                 method: "PUT",

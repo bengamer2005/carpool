@@ -6,40 +6,60 @@ import GetUserInfo from "../hooks/getUserInfo"
 // componentes
 import Header from "../components/header"
 // servicios
-import Register from "../services/handleRegisterUser"
+import { Register } from "../services/registerService"
 
 const RegisterPage = () => {
     const { username, userNotFound } = GetUserInfo()
     const [nameData, setNameData] = useState([])
     const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
     const [idRole, setIdRole] = useState("")
 
     const changePage = useNavigate()
 
-    // OBTIENE EL NOMBRE Y LO JUNTA
+    // obtiene el nombre del usuario en pantalla y lo junta
     useEffect(() => {
-    fetch("http://localhost:3000/carpool/userData/users")
-    .then((res) => res.json())
-    .then((data) => {
-        const userData = data[0]
-        setNameData(userData)
+        fetch("http://localhost:3000/carpool/userData/users")
+            .then((res) => res.json())
+            .then((data) => {
+                const userData = data[0]
+                setNameData(userData)
 
-        if (userData.length > 0) {
-            const { Nombre, ApPaterno, ApMaterno } = userData[0]
-            setName(`${Nombre} ${ApPaterno} ${ApMaterno}`)
-        }
-    })
+                if (userData.length > 0) {
+                    const { Nombre, ApPaterno, ApMaterno, Correo } = userData[0]
+                    setName(`${Nombre} ${ApPaterno} ${ApMaterno}`)
+                    setEmail(`${Correo}`)
+                }
+            })
     }, [])
 
-    // MANEJA LA LOGICA DEL REGISTER
+    // cada que entra un user guardo su info en localStorage
+    useEffect(() => {
+        const getUserInfo = async () => {
+            const response = await fetch("http://localhost:3000/carpool/user/getActualUser")
+            const data = await response.json()
+
+            if(data?.idUsers) {
+                localStorage.setItem("userId", data.idUsers)
+            }
+        }
+
+        getUserInfo()
+    }, [])
+
+    // maneja la logica del registro
     const handleRegister = async (event) => {
         event.preventDefault()
 
         if (!idRole) {
             return alert("Te falta seleccionar el rol")
         }
+
+        if (!email) {
+            return alert("Ocupas correo")
+        }
         
-        const result = await Register({ name, username,  idRole})
+        const result = await Register({ name, username, idRole, email })
 
         if (result) {
             let role = ""
@@ -91,6 +111,7 @@ const RegisterPage = () => {
 
                         <div className="form-container">
                             <p className="user">{name}</p>
+                            <input type="hidden" value={email}/>
                             <input type="hidden" value={name}/>
                             <input type="hidden" value={username}/>
                             <select className="field" value={idRole} onChange={(event) => setIdRole(event.target.value)}>

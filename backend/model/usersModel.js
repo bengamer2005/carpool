@@ -16,7 +16,7 @@ const Users = sequelize.define("Users", {
     idRole: {
         type: DataTypes.INTEGER
     },
-    Correo: {
+    email: {
         type: DataTypes.STRING
     }
 }, {

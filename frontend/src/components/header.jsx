@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react"
+// componentes
 import logo from "../img/GrupoGPBlanco.png"
 
 const Header = () => {
     const [user, setUser] = useState("...")
 
+    // se hace un fetch para saber el username del user
     useEffect(() => {
         fetch("http://localhost:3000/user")
         .then((res) => res.json())
@@ -12,7 +14,7 @@ const Header = () => {
     }, [])
 
     return (
-        <>
+        <div className="header-wrapper">
             <header className="header">
                 <div className="header-left">
                     <img src={logo} alt="Grupo GP Logo" className="logo" />
@@ -26,7 +28,7 @@ const Header = () => {
                     Hola, {user}!
                 </div>
             </header>
-        </>
+        </div>
     )
 }
 

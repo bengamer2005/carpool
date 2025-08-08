@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { DisableAllRoutes, ChangeStatusRoute } from "../services/handleActivationRoute"
+import { DisableAllRoutes, ChangeStatusRoute, UserRoutes } from "../services/driverService"
 import Swal from "sweetalert2"
 
 const DriversRoute = () => {
     const [search, setSearch] = useState("")
+    const [carfullChecked, setCarfullChecked] = useState(false)
 
+    // hacemos una funcion con swal para mostrar los comentarios de una ruta en forma de modal
     const openRouteinfo = (info) => {
         Swal.fire({
             title: "Comentarios de la ruta",
@@ -14,29 +16,37 @@ const DriversRoute = () => {
         })
     }
 
-    const fetchUserRoutes = async () => {
-        const response = await fetch("http://localhost:3000/carpool/driver/getUserRoute")
-        const data = await response.json()
-        return data[0]
-    }
-
-    const { data: drivers = [], isLoading, error, refetch } = useQuery({
+    // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query  
+    const { data: drivers = [], refetch } = useQuery({
         queryKey: ["userRoutes"],
-        queryFn: fetchUserRoutes
+        queryFn: UserRoutes
     })
 
+    // desactivamos el estado del slider de carfull si se activa una ruta 
+    useEffect(() => {
+        const actveRoutes = drivers.some(driver => driver.nameStatus === "activa")
+        if(actveRoutes) {
+            setCarfullChecked(false)
+        }
+    }, [drivers])
+
+    // hacemos la logica del buscador
     const valueToSearch = drivers.filter((driver) => {
-        const value = search.toLowerCase()
+        // pasamos los parametros a buscar y los ponemos en minusculas y quitamos espacios 
+        const value = search.toLowerCase().trim()
         
+        // buscamos en todas las columnas el parametro a buscar
         return (
-            driver.name.toLowerCase().includes(value) || 
+            driver.idUserRoutes.toString().includes(value) || 
             driver.startingPoint.toLowerCase().includes(value) || 
             driver.arrivalPoint.toLowerCase().includes(value) || 
             driver.startTime.toLowerCase().includes(value) ||
-            driver.arrivalTime.toLowerCase().includes(value)
+            driver.arrivalTime.toLowerCase().includes(value) ||
+            driver.routeWay.toLowerCase().includes(value)
         )
     })
 
+    // le damos un formato a la hora
     const time = (timeString) => {
         const date = new Date(timeString)
         const hour = date.getUTCHours().toString().padStart(2, '0')
@@ -49,31 +59,43 @@ const DriversRoute = () => {
         <>
             <div>
                 <div className="route-container">
+
+                    {/* slider para desactivar todas las rutas, carfull */}
                     <div className="car-full">
                         <p>CAR FULL</p>
                         <label className="switch2">
-                            <input type="checkbox" onChange={async () => {
-                                await DisableAllRoutes()
-                                refetch()
+                            <input type="checkbox" checked={carfullChecked} onChange={async (event) => {
+                                // le asignamos el estatus del checkbox a una constante
+                                const checked = event.target.checked
+                                
+                                setCarfullChecked(checked)
+
+                                // solo si checked se pasa a true deshabilita las rutas y hace el refetch
+                                if(checked) {
+                                    await DisableAllRoutes()
+                                    refetch()
+                                }
                             }}/>
                             <span className="slider"></span>
                         </label>       
                     </div>
 
+                    {/* input para buscar en la tabla */}
                     <div className="search-bar">
-                        <label htmlFor="input" className="text">Buscar:</label>
-                        <input type="text" name="input" className="input" placeholder="Escribe algo..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ marginBottom: "1rem", padding: "0.5rem", width: "87%" }}/>
+                        <label htmlFor="input-search" className="text-search">Buscar:</label>
+                        <input type="text" name="input-search" className="input-search" placeholder="Escribe algo..." value={search} onChange={(event) => setSearch(event.target.value)} style={{ marginBottom: "1rem", padding: "0.5rem", width: "87%" }}/>
                     </div>
                 </div>
 
+                {/* tabla con todas las rutas y su info */}
                 <table className="users-table" border={1} cellPadding={10}>
                     <thead>
                         <tr>
                             <th>ID </th>
                             <th>PUNTO DE SALIDA</th>
                             <th>PUNTO DE LLEGADA</th>
-                            <th>TIEMPO DE SALIDA</th>
-                            <th>TIEMPO DE LLEGADA ESTIMADA</th>
+                            <th>HORARIO SALIDA</th>
+                            <th>HORARIO LLEGADA ESTIMADA</th>
                             <th>TIPO DE RUTA</th>
                             <th>ACTIVAR / DESACTIVAR</th>
                             <th>VER RUTA</th>
@@ -90,12 +112,16 @@ const DriversRoute = () => {
                                 <td>{time(driver.startTime)}</td>
                                 <td>{time(driver.arrivalTime)}</td>
                                 <td>{driver.routeWay}</td>
+
+                                {/* checkbox para activar y desactivar rutas */}
                                 <td>
                                     <div className="active-container">
                                         <input type="checkbox" id={`checkbox-${driver.idUserRoutes}`} className="checkbox-hidden" checked={driver.nameStatus === "activa"} onChange={async () => { await ChangeStatusRoute(driver.idUserRoutes), await refetch()}}/>
                                         <label htmlFor={`checkbox-${driver.idUserRoutes}`} className="switch">ACTIVA</label>
                                     </div>
                                 </td>
+
+                                {/* link a google maps pasandole las direcciones de ida y regreso */}
                                 <td>
                                     <a href={`https://www.google.com/maps/dir/${driver.startingPoint}/${driver.arrivalPoint}`}
                                         target="_blank"
@@ -119,13 +145,15 @@ const DriversRoute = () => {
                                         </svg>
                                     </a>
                                 </td>
+
+                                {/* boton para poder ver los comentarios */}
                                 <td>
                                     <button className="button-comentarios" data-tooltip="Ver comentarios" type="button" onClick={() => openRouteinfo(driver.routeInfo)}>
                                         <div className="button-comentarios-wrapper">
                                             <div className="text-comentarios ">Ver mas</div>
                                             <span className="icon-comentarios ">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
-                                                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-plus-lg" viewBox="0 0 16 16">
+                                                    <path fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
                                                 </svg>
                                             </span>
                                         </div>

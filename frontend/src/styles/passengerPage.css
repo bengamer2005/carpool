@@ -31,7 +31,7 @@
 }
 
 /* BOTON DE SOLICITUDES */
-.fill-hover-button {
+.fill-hover-button-null {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -46,7 +46,7 @@
   transition: color 0.3s ease;
 }
 
-.fill-hover-button::before {
+.fill-hover-button-null::before {
   content: '';
   position: absolute;
   background-color: #333;
@@ -58,20 +58,20 @@
   transition: width 0.3s ease;
 }
 
-.fill-hover-button:hover::before {
+.fill-hover-button-null:hover::before {
   width: 100%;
 }
 
-.fill-hover-button:hover {
+.fill-hover-button-null:hover {
   color: white;
 }
 
-.fill-hover-button svg {
+.fill-hover-button-null svg {
   z-index: 1;
 }
 
-.fill-hover-button span, 
-.fill-hover-button svg {
+.fill-hover-button-null span, 
+.fill-hover-button-null svg {
   transition: color 0.3s ease;
   position: relative;
   z-index: 1;
@@ -79,6 +79,60 @@
 
 .ruta {
   border: none;
+}
+
+/* BOTON DE SOLICITADO */
+.fill-hover-button-solicitado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-weight: bold;
+  background: transparent;
+  border: 2px solid #777500;
+  overflow: hidden;
+  cursor: auto;
+  transition: color 0.3s ease;
+  color: #ffffff;
+  background-color: rgb(195, 179, 56);
+  box-shadow: 0px 0px 40px rgb(234, 255, 0);
+}
+
+/* BOTON DE ACEPTADO */
+.fill-hover-button-aceptado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-weight: bold;
+  background: transparent;
+  border: 2px solid #167700;
+  overflow: hidden;
+  cursor: auto;
+  transition: color 0.3s ease;
+  color: #ffffff;
+  background-color: rgb(86, 195, 56);
+  box-shadow: 0px 0px 40px rgb(106, 255, 0);
+}
+
+/* BOTON DE DENEGADO */
+.fill-hover-button-denegado {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-weight: bold;
+  background: transparent;
+  border: 2px solid #770000;
+  overflow: hidden;
+  cursor: auto;
+  transition: color 0.3s ease;
+  color: #ffffff;
+  background-color: rgba(195, 56, 56, 0.918);
+  box-shadow: 0px 0px 40px rgba(255, 0, 0, 0.62);
 }
 
 /* BUSCARDOR */
@@ -90,7 +144,7 @@
   max-width: 250px;
 }
 
-.search-bar label.text {
+.search-bar label.text-search {
   font-size: 0.75rem;
   color: #818CF8;
   font-weight: 700;
@@ -102,7 +156,7 @@
   width: fit-content;
 }
 
-.search-bar input[type=text].input {
+.search-bar input[type=text].input-search {
   padding: 11px 10px;
   font-size: 0.75rem;
   border: 2px #818CF8 solid;
@@ -167,7 +221,7 @@
 
 /* SLIDER PARA LAS RUTAS */
 .main-slider-container {
-  width: auto;
+  width: 100%;
   overflow: hidden;
   position: relative;
 }
@@ -175,13 +229,140 @@
 .slider2 {
   display: flex;
   flex-direction: row;
-  width: 200vw;
+  width: 200%;
   transition: transform 0.5s ease-in-out;
 }
 
 .container-route {
-  width: 100vw;
+  width: 50%;
   flex-shrink: 0;
-  padding: 1rem;
   box-sizing: border-box;
+}
+
+/* BOTON PARA PAGINACION */
+.paginacion1,
+.paginacion2 {
+  height: 3em;
+  width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #cfcfcf;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  transition: all 0.2s linear;
+  cursor: pointer;
+  border: none;
+}
+
+.paginacion1 > svg,
+.paginacion2 > svg {
+  font-size: 20px;
+  transition: all 0.4s ease-in;
+  flex-shrink: 0;
+}
+
+.paginacion1:hover > svg {
+  transform: translateX(-5px);
+}
+
+.paginacion2:hover > svg {
+  transform: translateX(5px);
+}
+
+.paginacion1:hover,
+.paginacion2:hover {
+  box-shadow: 9px 9px 33px #d1d1d1, -9px -9px 33px #ffffff;
+  transform: translateY(-2px);
+}
+
+/* VIAJES PENDIENTES */
+.rides-pending {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.rides-lunes { grid-area: 1 / 1 / 4 / 2; }
+.rides-martes { grid-area: 1 / 2 / 4 / 3; }
+.rides-miercoles { grid-area: 1 / 3 / 4 / 4; }
+.rides-jueves { grid-area: 1 / 4 / 4 / 5; }
+.rides-viernes { grid-area: 1 / 5 / 4 / 6; }
+
+/* BOTON PAGINACION ACCEPTED REQ */
+/* From Uiverse.io by xopc333 */ 
+.button-acceptedReq {
+  display: block;
+  position: relative;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  overflow: hidden;
+  outline: none;
+  background-color: transparent;
+  cursor: pointer;
+  border: 0;
+}
+
+.button-acceptedReq:before,
+.button-acceptedReq:after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  inset: 7px;
+}
+
+.button-acceptedReq:before {
+  border: 4px solid #2a2a2a;
+  transition: opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
+    transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
+}
+
+.button-acceptedReq:after {
+  border: 4px solid #717171;
+  transform: scale(1.3);
+  transition: opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0;
+}
+
+.button-acceptedReq:hover:before,
+.button-acceptedReq:focus:before {
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+    transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.button-acceptedReq:hover:after,
+.button-acceptedReq:focus:after {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1) 80ms,
+    transform 0.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) 80ms;
+}
+
+.button-box-acceptedReq {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.button-elem-acceptedReq {
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 17px 18px 0 18px;
+  transform: rotate(180deg);
+  fill: #222222;
+}
+
+.button-acceptedReq:hover .button-box-acceptedReq,
+.button-acceptedReq:focus .button-box-acceptedReq {
+  transition: 0.4s;
+  transform: translateX(-56px);
 }

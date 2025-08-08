@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer")
-require("dotenv").emailInfo
 
+// pasamos los datos del correo que mandara los avisos
 const info = nodemailer.createTransport({
     service: "outlook",
     auth: {
@@ -9,15 +9,29 @@ const info = nodemailer.createTransport({
     }
 })
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, html) => {
     try {
         await info.sendMail({
-            from: "benito.garcia@grupogp.com.mx",
+            from: `"Carpool", <${process.env.EMAIL_USER}>`,
             to,
             subject,
-            text
+            html,
+            // llamamos a las img que se usan en el correo
+            attachments: [{
+                filename: "logoGpAzul.png",
+                path: "../frontend/src/img/logoGpAzul.png",
+                cid: "logoGpAzul"
+            }, {
+                filename: "CorreoHeader.png",
+                path: "../frontend/src/img/CorreoHeader.png",
+                cid: "CorreoHeader"
+            }, {
+                filename: "iconoTeams.png",
+                path: "../frontend/src/img/iconoTeams.png",
+                cid: "iconoTeams"
+            }]
         })
-        console.log("correo enviado a: ", to)
+
     } catch (error) {
         console.error("error al mandar el email: ", error)
     }

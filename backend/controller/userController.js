@@ -1,5 +1,23 @@
 const Users = require("../model/usersModel")
 
+// Obtiene la info del user en pantalla 
+const getActualUser = async (req, res) => {
+    try {
+        const USER = process.env.USERNAME
+        const user = await Users.findOne({
+            where: { username: USER }
+        })
+
+        if(!user) {
+            res.status(404).json({message: "Usuario aun no registrado"})
+        }
+
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
 // Llamar a un user en especifico
 const getUser = async (req, res) => {
     try {
@@ -67,6 +85,7 @@ const searchUser = async (req, res) => {
 }
 
 module.exports = {
+    getActualUser,
     getUser,
     getAllUsers,
     createUser,
