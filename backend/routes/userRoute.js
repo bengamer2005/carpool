@@ -1,10 +1,12 @@
 const router = require("express").Router()
-const { getActualUser, getUser, getAllUsers, createUser, deleteUser, searchUser } = require("../controller/userController")
+const { registerUser, loginUser, getActualUser, getUser, getAllUsers, deleteUser, searchUser } = require("../controller/userController")
+
+router.post("/register", registerUser)
+router.post("/login", loginUser)
 
 router.get("/getActualUser", getActualUser)
 router.get("/get/:id", getUser)
 router.get("/getAll", getAllUsers)
-router.post("/create", createUser)
 router.delete("/delete/:id", deleteUser)
 router.post("/search", searchUser)
 

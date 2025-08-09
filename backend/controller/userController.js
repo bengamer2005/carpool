@@ -1,4 +1,69 @@
+const { mapWhereFieldNames } = require("sequelize/lib/utils")
 const Users = require("../model/usersModel")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+
+// registro de un usuario
+const registerUser = async (req, res) => {
+    try {
+        const { name, username, idRole, email, password } = req.body
+
+        // si no cuenta con todos los campos lanzamos error
+        if(!name || !username || !idRole || !email || !password) {
+            return res.status(400).json({message: "Faltan campos por llenar"})
+        }
+
+        // hashear contraseña
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+
+        const user = await Users.create({ name, username, idRole, email, password: hashedPassword })
+        res.status(200).json(user)
+    } catch (error) {
+        res.status(500).json({message: "Ocurrio un error al registrar, error: ", error})
+    }
+}
+
+// login de un usuario
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body
+
+        // si no completa todos los campos lanzamos error
+        if(!email || !password) {
+            return res.status(400).json({message: "Faltan campos por llenar"})
+        }
+
+        // buscamos si existe el user
+        const user = await Users.findOne({
+            where: { email }
+        })
+
+        if(!user) {
+            return res.status(404).json({message: "Usuario no encontrado"})
+        }
+
+        // verificamos la contraseña
+        const comparePassword = await bcrypt.compare(password, user.password)
+        
+        if(!comparePassword) {
+            return res.status(401).json({message: "Contraseña incorrecta"})
+        }
+
+        // generamos el token
+        const token = jwt.sign({
+            id: user.idUsers, 
+            email: user.email,
+            role: user.idRole
+        }, process.env.JWT_SECRET, {
+            expiresIn: "1h"
+        })
+
+        res.status(200).json({message: "Login exitoso: ", token})
+    } catch (error) {
+        res.status(500).json({message: "Ocurrio un error en el login: ", error})
+    }
+}
 
 // Obtiene la info del user en pantalla 
 const getActualUser = async (req, res) => {
@@ -38,15 +103,6 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-// Crear un nuevo user
-const createUser = async (req, res) => {
-    try {
-        const user = await Users.create(req.body)
-        res.status(200).json({user})
-    } catch (error) {
-        res.status(500).json({message: "Ocurrio un error al crear un user, error: ", error})
-    }
-}
 
 // Eliminar a un user
 const deleteUser = async (req, res) => {
@@ -71,7 +127,8 @@ const searchUser = async (req, res) => {
         const user = process.env.USERNAME
         
         const search = await Users.findOne({
-            where: {username: user}})
+            where: {username: user}
+        })
 
         if (search.username === user) {
             return res.status(200).json({ userNotFound: false, idRole: search.idRole, idUsers: search.idUsers })
@@ -85,10 +142,11 @@ const searchUser = async (req, res) => {
 }
 
 module.exports = {
+    registerUser,
+    loginUser,
     getActualUser,
     getUser,
     getAllUsers,
-    createUser,
     deleteUser,
     searchUser
 }
