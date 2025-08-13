@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Notyf } from "notyf"
 // hook
 import DriversRoute from "../hooks/getAllRoutes"
-import GetUserInfo from "../hooks/getUserInfo"
 import { useRegisterRoute } from "../hooks/getMutations"
 import DriverRequests from "../hooks/getAllRequests"
 import GetAllRides from "../hooks/getAllRides"
@@ -30,16 +29,15 @@ const notyf = new Notyf({
 })
 
 const Driver = () => {
-    const userId = localStorage.getItem("userId")
-    useSSEListen(userId)
+    const userData = JSON.parse(localStorage.getItem("user"))
+    useSSEListen(userData.idUsers)
 
     // se manda notificacion de bienvenida
     useEffect(() => {
-        notyf.success("Bienvenido al apartado de conductores")
+        notyf.success(`Bienvenido al apartado de conductores ${userData.username}`)
     }, [])
 
     // se consigue el id del usuario en pantalla
-    const { idUsers } = GetUserInfo()
     const [formRouteType, setFormRouteType] = useState("entrada")
     const [showReturn, setShowReturn] = useState(false)
 
@@ -93,7 +91,7 @@ const Driver = () => {
             idStatus,
             startTime,
             arrivalTime,
-            idUsers,
+            idUsers: userData.idUsers,
             idRouteWay,
             routeInfo
         }
@@ -154,7 +152,7 @@ const Driver = () => {
                             setStartingPoint={setStartingPoint}
                             arrivalPoint={arrivalPoint}
                             setArrivalPoint={setArrivalPoint}
-                            idUsers={idUsers}
+                            idUsers={userData.idUsers}
                             geocodeAddress={geocodeAddress}
                             startTime={startTime}
                             setStartTime={setStartTime}
@@ -197,7 +195,7 @@ const Driver = () => {
                             setStartingPoint={setStartingPointReturn}
                             arrivalPoint={arrivalPointReturn}
                             setArrivalPoint={setArrivalPointReturn}
-                            idUsers={idUsers}
+                            idUsers={userData.idUsers}
                             geocodeAddress={geocodeAddress}
                             startTime={startTimeReturn}
                             setStartTime={setStartTimeReturn}

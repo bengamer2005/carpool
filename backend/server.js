@@ -1,7 +1,7 @@
 const express = require("express")
 const app = express()
 app.use(express.json())
-require("dotenv").config({ path: "./emailInfo.env" })
+require("dotenv").config({ path: "./.env" })
 
 // permitimos solo peticiones de este origen solamente
 const cors = require("cors")

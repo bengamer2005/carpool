@@ -13,6 +13,15 @@ const registerUser = async (req, res) => {
             return res.status(400).json({message: "Faltan campos por llenar"})
         }
 
+        // si ya existe un usuario con mismo correo lanzamos error
+        const findEmail = await Users.findOne({
+            where: { email }
+        })
+        
+        if(findEmail) {
+            return res.status(401).json({message: "Email ya registrado, favor de iniciar sesion"})
+        }
+
         // hashear contraseña
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
@@ -35,19 +44,20 @@ const loginUser = async (req, res) => {
         }
 
         // buscamos si existe el user
+        const emailUser = email.trim().toLowerCase()
         const user = await Users.findOne({
-            where: { email }
+            where: { email: emailUser }
         })
 
         if(!user) {
-            return res.status(404).json({message: "Usuario no encontrado"})
+            return res.status(404).json({message: "Favor de registrarse"})
         }
 
         // verificamos la contraseña
         const comparePassword = await bcrypt.compare(password, user.password)
         
         if(!comparePassword) {
-            return res.status(401).json({message: "Contraseña incorrecta"})
+            return res.status(401).json({message: "Credenciales invalidas"})
         }
 
         // generamos el token
@@ -59,27 +69,11 @@ const loginUser = async (req, res) => {
             expiresIn: "1h"
         })
 
-        res.status(200).json({message: "Login exitoso: ", token})
+        const { password: _, ...userData } = user.dataValues
+
+        res.status(200).json({message: "Login exitoso: ", token, user: userData})
     } catch (error) {
-        res.status(500).json({message: "Ocurrio un error en el login: ", error})
-    }
-}
-
-// Obtiene la info del user en pantalla 
-const getActualUser = async (req, res) => {
-    try {
-        const USER = process.env.USERNAME
-        const user = await Users.findOne({
-            where: { username: USER }
-        })
-
-        if(!user) {
-            res.status(404).json({message: "Usuario aun no registrado"})
-        }
-
-        res.status(200).json(user)
-    } catch (error) {
-        res.status(500).json({ error: error.message })
+        res.status(500).json({message: "Ocurrio un error en el login: ", error: error.message})
     }
 }
 
@@ -103,50 +97,9 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-
-// Eliminar a un user
-const deleteUser = async (req, res) => {
-    try {
-        const user = await Users.destroy({
-            where: { idUsers: req.params.id }
-        })
-        
-        if(!user) {
-            return res.status(404).json({message: `No se encontro al user con id: ${req.params.id}`})
-        }
-
-        res.status(200).json({message: `Se elimino al user con id: ${req.params.id}`})  
-    } catch (error) {
-        res.status(500).json({message: "Ocurrio un error al eliminar un user, error: ", error})        
-    }
-}
-
-// Buscar user con el user de windows
-const searchUser = async (req, res) => {
-    try {
-        const user = process.env.USERNAME
-        
-        const search = await Users.findOne({
-            where: {username: user}
-        })
-
-        if (search.username === user) {
-            return res.status(200).json({ userNotFound: false, idRole: search.idRole, idUsers: search.idUsers })
-        }
-
-        console.log(search)
-        return res.status(200).json({ userNotFound: true })
-    } catch (error) {
-        res.status(500).json({message: `Ocurrió un error al buscar el user: ${error.message}`})
-    }
-}
-
 module.exports = {
     registerUser,
     loginUser,
-    getActualUser,
     getUser,
-    getAllUsers,
-    deleteUser,
-    searchUser
+    getAllUsers
 }

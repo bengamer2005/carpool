@@ -1,47 +1,51 @@
-// aqui creamos todos los servicios utilizados en el aprtado del registro
+// aqui creamos todos los servicios utilizados en el aprtado del registro y login
+const apiUrl = import.meta.env.VITE_BACKEND_URL
 
 // se hace el registro del usuario
-export const Register = async ({name, username, idRole, email}) => {
+export const Register = async ({ name, username, idRole, email, password }) => {
     try {
-        const response = await fetch("http://localhost:3000/carpool/user/create", {
+        const response = await fetch(`${apiUrl}/carpool/user/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({name, username, idRole, email})
+            body: JSON.stringify({name, username, idRole, email, password})
         })
 
+        const result = await response.json()
+
         if(!response.ok) {
-            alert("No se pudo registrar")
-            return null
+            const errorMessage = result.message || "Error al registrarse"
+            throw new Error(errorMessage)
         }
 
-        const result = await response.json()
         return result 
     } catch (error) {
         console.error("Error en el Register, error: ", error)
+        throw error
     }
 }
 
-// se busca al usuario que esta en pantalla para ver si esta registrado 
-export const Search = async () => {
+export const Login = async ({ email, password }) => {
     try {
-        const response = await fetch("http://localhost:3000/carpool/user/search", {
+        const response = await fetch(`${apiUrl}/carpool/user/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
+            body: JSON.stringify({email, password})
         })
 
+        const result = await response.json()
+
         if(!response.ok) {
-            console.log("El user no esta registrado")
-            // si no esta registrado marcamos como true para que no redirija
-            return { userNotFound: true }
+            const errorMessage = result.message || "Error al logearte"
+            throw new Error(errorMessage)
         }
 
-        const result = await response.json()
         return result
     } catch (error) {
-        console.error("Error en buscar al user, error: ", error)       
+        console.error("Error en el login, error: ", error)
+        throw error
     }
 }

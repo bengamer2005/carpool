@@ -3,15 +3,8 @@ import React, { useEffect, useState } from "react"
 import logo from "../img/GrupoGPBlanco.png"
 
 const Header = () => {
-    const [user, setUser] = useState("...")
-
-    // se hace un fetch para saber el username del user
-    useEffect(() => {
-        fetch("http://localhost:3000/user")
-        .then((res) => res.json())
-        .then((data) => setUser(data.username))
-        .catch(() => setUser("GGP\\Invitado"))
-    }, [])
+    // se obtiene la info del user guardada en localStorage
+    const userData = JSON.parse(localStorage.getItem("user"))
 
     return (
         <div className="header-wrapper">
@@ -25,7 +18,7 @@ const Header = () => {
                 </div>
                 
                 <div className="header-right">
-                    Hola, {user}!
+                    Hola, {userData.username}!
                 </div>
             </header>
         </div>
