@@ -1,8 +1,8 @@
 // aqui creamos todos los servicios utilizados en el aprtado del conductor
 
 // llamamos todas las rutas del codnuctor
-export const UserRoutes = async () => {
-    const response = await fetch("http://localhost:3000/carpool/driver/getUserRoute")
+export const UserRoutes = async (idUsers) => {
+    const response = await fetch(`http://localhost:3000/carpool/driver/getUserRoute/${idUsers}`)
     const data = await response.json()
     return data[0]
 }
@@ -30,9 +30,9 @@ export const ChangeStatusRoute = async (idUser) => {
 }
 
 // deshabilitamos todas las rutas del conductor
-export const DisableAllRoutes = async () => {
+export const DisableAllRoutes = async (idUsers) => {
     try {
-        const response = await fetch ("http://localhost:3000/carpool/driver/allRoute/disable", {
+        const response = await fetch (`http://localhost:3000/carpool/driver/allRoute/disable/${idUsers}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -52,9 +52,9 @@ export const DisableAllRoutes = async () => {
 }
 
 // agregamos una ruta nueva
-export const RegisterRoute = async (data) => {
+export const RegisterRoute = async (data, idUsers) => {
     try {
-        const response = await fetch("http://localhost:3000/carpool/driver/createRoute", {
+        const response = await fetch(`http://localhost:3000/carpool/driver/createRoute/${idUsers}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -119,9 +119,9 @@ export const updateRequestStatus = async (idRequest, action) => {
 }
 
 // llamamos a todas las solicitudes del conductor
-export const AllDriverRequest = async () => {
+export const AllDriverRequest = async (idUsers) => {
     try {
-        const response = await fetch("http://localhost:3000/carpool/driver/request/getAll")
+        const response = await fetch(`http://localhost:3000/carpool/driver/request/getAll/${idUsers}`)
 
         if(!response) {
             throw new Error("Error al llamar las solicitudes del conductor")
@@ -135,8 +135,8 @@ export const AllDriverRequest = async () => {
 }
 
 // llama a todos los viajes del conductor
-export const getAllRides = async () => {
-    const response = await fetch("http://localhost:3000/carpool/driver/rides/getAll")
+export const getAllRides = async (idUsers) => {
+    const response = await fetch(`http://localhost:3000/carpool/driver/rides/getAll/${idUsers}`)
     const data = await response.json()
 
     // los grupamos por dia

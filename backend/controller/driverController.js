@@ -116,9 +116,9 @@ const formatHour = (time) => {
 const changeStatus = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         if(!user) {
@@ -138,9 +138,9 @@ const changeStatus = async (req, res) => {
 // crea una ruta
 const createRoute = async (req, res) => {
     // se obtiene el id del user quien crea la ruta
-    const user = process.env.USERNAME
+    const userId = req.params.id
     const getIdUser = await Users.findOne({
-        where: {username: user}
+        where: { idUsers: userId }
     })
 
     const { startingPoint, arrivalPoint, idStatus, idUsers, idRouteWay, startTime, arrivalTime, routeInfo } = req.body
@@ -218,9 +218,9 @@ const createRoute = async (req, res) => {
 const getUserRoute = async (req, res) => {
     try {     
         // conseguimos la info del usuario actual
-        const user = process.env.USERNAME
+        const userId = req.params.id
         const getIdUser = await Users.findOne({
-            where: {username: user}
+            where: {idUsers: userId}
         })
     
         if(!getIdUser) {
@@ -264,9 +264,9 @@ const getUserRoute = async (req, res) => {
 const disableAllUserRoutes = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const user = process.env.USERNAME
+        const userId = req.params.id
         const getIdUser = await Users.findOne({
-            where: {username: user}
+            where: {idUsers: userId}
         })
     
         if(!getIdUser) {
@@ -593,9 +593,9 @@ const requestRejected = async (req, res) => {
 const getAllUserRequest = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         // hacemos una consulta de todas las solicitudes que tiene pendiente el usuario
@@ -631,9 +631,9 @@ const getAllUserRequest = async (req, res) => {
 const getAllRides = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         // le hacemos una consulta a todos los viajes que tiene pendiente el usuario en la semana en curso

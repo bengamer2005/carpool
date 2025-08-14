@@ -29,6 +29,7 @@ const notyf = new Notyf({
 })
 
 const Driver = () => {
+    // conseguimos la info del user desde localStorage
     const userData = JSON.parse(localStorage.getItem("user"))
     useSSEListen(userData.idUsers)
 
@@ -99,7 +100,7 @@ const Driver = () => {
         try {
 
             // se hace el post de la ruta
-            await mutation.mutateAsync(data)
+            await mutation.mutateAsync(data, userData.idUsers)
 
             // vaciamos los campos 
             setStartTime("")
@@ -122,13 +123,13 @@ const Driver = () => {
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query
     const { data: rides = [], refetch } = useQuery({
         queryKey: ["userRides"],
-        queryFn: getAllRides
+        queryFn: getAllRides(userData.idUsers)
     })
 
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query
     const { data: requests = [], refetch: refetchReq } = useQuery({
         queryKey: ["request"],
-        queryFn: AllDriverRequest
+        queryFn: AllDriverRequest(userData.idUsers)
     })
 
     return (

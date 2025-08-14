@@ -7,6 +7,9 @@ const DriversRoute = () => {
     const [search, setSearch] = useState("")
     const [carfullChecked, setCarfullChecked] = useState(false)
 
+    // obtenemos toda la info del usuario en pantalla
+    const userData = JSON.parse(localStorage.getItem("user"))
+
     // hacemos una funcion con swal para mostrar los comentarios de una ruta en forma de modal
     const openRouteinfo = (info) => {
         Swal.fire({
@@ -19,7 +22,7 @@ const DriversRoute = () => {
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query  
     const { data: drivers = [], refetch } = useQuery({
         queryKey: ["userRoutes"],
-        queryFn: UserRoutes
+        queryFn: UserRoutes(userData.idUsers)
     })
 
     // desactivamos el estado del slider de carfull si se activa una ruta 
@@ -72,7 +75,7 @@ const DriversRoute = () => {
 
                                 // solo si checked se pasa a true deshabilita las rutas y hace el refetch
                                 if(checked) {
-                                    await DisableAllRoutes()
+                                    await DisableAllRoutes(userData.idUsers)
                                     refetch()
                                 }
                             }}/>
