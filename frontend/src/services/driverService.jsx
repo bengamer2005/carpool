@@ -52,7 +52,7 @@ export const DisableAllRoutes = async (idUsers) => {
 }
 
 // agregamos una ruta nueva
-export const RegisterRoute = async (data, idUsers) => {
+export const RegisterRoute = async ({ data, idUsers }) => {
     try {
         const response = await fetch(`http://localhost:3000/carpool/driver/createRoute/${idUsers}`, {
             method: "POST",

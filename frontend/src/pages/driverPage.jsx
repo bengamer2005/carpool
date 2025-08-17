@@ -98,9 +98,11 @@ const Driver = () => {
         }
 
         try {
-
+            
             // se hace el post de la ruta
-            await mutation.mutateAsync(data, userData.idUsers)
+            await mutation.mutateAsync({
+                data, idUsers: userData.idUsers
+            })
 
             // vaciamos los campos 
             setStartTime("")

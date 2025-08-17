@@ -22,7 +22,8 @@ const DriversRoute = () => {
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query  
     const { data: drivers = [], refetch } = useQuery({
         queryKey: ["userRoutes"],
-        queryFn: UserRoutes(userData.idUsers)
+        queryFn: () => UserRoutes(userData.idUsers),
+        enabled: !!userData.idUsers
     })
 
     // desactivamos el estado del slider de carfull si se activa una ruta 
