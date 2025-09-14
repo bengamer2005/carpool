@@ -613,7 +613,7 @@ const getAllUserRequest = async (req, res) => {
             WHERE Req.idStatusReq = 1 
                 AND Routes.idUsers = :idDriver
         `, {
-            replacements: { idDriver: user.idUsers },
+            replacements: { idDriver: userId },
             type: DB.QueryTypes.SELECT
         })
 

@@ -8,10 +8,14 @@ import { CardAcceptedReq } from "../components/cards"
 import noSolicitudes from "../img/noSolicitudesFeedBack.png"
 
 const AcceptedReq = () => {
+    // conseguimos toda la info del user en pantalla
+    const userData = JSON.parse(localStorage.getItem("user"))
+
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query de las de ida
     const { data: acceptedReq = [] } = useQuery({
         queryKey: ["acceptedReq"],
-        queryFn: getAllAcceptedReq
+        queryFn: () => getAllAcceptedReq(userData.idUsers),
+        enabled: !!userData.idUsers
     })
 
     // le asignamos un estado a las const y ponemos un limite de cards por pagina

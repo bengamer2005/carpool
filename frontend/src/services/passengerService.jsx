@@ -1,28 +1,28 @@
 // aqui creamos todos los servicios utilizados en el aprtado del pasajero
 
 // llamamos a todas las rutas de ida de los conductores que esten activas
-export const getGoingRoutes = async () => {
-    const response = await fetch("http://localhost:3000/carpool/passenger/route/going")
+export const getGoingRoutes = async (userId) => {
+    const response = await fetch(`http://localhost:3000/carpool/passenger/route/going/${userId}`)
     const data = await response.json()
     return data[0]
 }
 
 // llamamos a todas las rutas de regreso de los conductores que esten activas
-export const getReturnRoutes = async () => {
-    const response = await fetch("http://localhost:3000/carpool/passenger/route/return")
+export const getReturnRoutes = async (userId) => {
+    const response = await fetch(`http://localhost:3000/carpool/passenger/route/return/${userId}`)
     const data = await response.json()
     return data[0]
 }
 
 // para solicitar una ruta
-export const sendRequest = async ({idRoute, dayRequest}) => {
+export const sendRequest = async ({idRoute, dayRequest, userId}) => {
     try {
         const response = await fetch(`http://localhost:3000/carpool/passenger/sendRequest/${idRoute}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({dayRequest})
+            body: JSON.stringify({dayRequest, userId})
         })
 
         const result = await response.json()
@@ -48,8 +48,8 @@ export const sendRequest = async ({idRoute, dayRequest}) => {
 }
 
 // llamo a todas las solicitudes aceptadas del pasajero
-export const getAllAcceptedReq = async () => {
-    const response = await fetch("http://localhost:3000/carpool/passenger/allRequest/accepted")
+export const getAllAcceptedReq = async (userId) => {
+    const response = await fetch(`http://localhost:3000/carpool/passenger/allRequest/accepted/${userId}`)
     const data = await response.json()
     return data
 }

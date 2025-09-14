@@ -125,13 +125,15 @@ const Driver = () => {
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query
     const { data: rides = [], refetch } = useQuery({
         queryKey: ["userRides"],
-        queryFn: getAllRides(userData.idUsers)
+        queryFn: () => getAllRides(userData.idUsers),
+        enabled: !!userData.idUsers
     })
 
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query
     const { data: requests = [], refetch: refetchReq } = useQuery({
         queryKey: ["request"],
-        queryFn: AllDriverRequest(userData.idUsers)
+        queryFn: () => AllDriverRequest(userData.idUsers),
+        enabled: !!userData.idUsers
     })
 
     return (

@@ -10,8 +10,8 @@ import Navbar from "../components/navbar"
 import useSSEListen from "../services/sseService"
 
 const Passenger = () => {
-    const userId = localStorage.getItem("userId")
-    useSSEListen(userId)
+    const userId = JSON.parse(localStorage.getItem("user"))
+    useSSEListen(userId.idUsers)
 
     // se manda una notificacion con Notyf al entrar al apartado
     useEffect(() => {

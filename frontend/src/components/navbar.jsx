@@ -4,12 +4,13 @@ import Swal from "sweetalert2"
 const Navbar = () => {
     const changePage = useNavigate()
     const page = useLocation()
+    const userInfo = JSON.parse(localStorage.getItem("user"))
 
     // se crean las constantes con las rutas de los apartados pasajero / conductor
     const pageDriver = page.pathname === "/conductor"
     const pagePassenger = page.pathname === "/pasajero"
 
-    const handleRole = async (role, rolePage) => {
+    const handleRole = async (role, rolePage, userId) => {
 
         // se usa swal para preguntar el cambio de roles
         const changeRole = await Swal.fire({
@@ -28,7 +29,7 @@ const Navbar = () => {
 
         // intentamos hacer el cambio de rol
         try {
-            const response = await fetch(`http://localhost:3000/carpool/${role}/changeStatus`, {
+            const response = await fetch(`http://localhost:3000/carpool/${role}/changeStatus/${userInfo.idUsers}`, {
                 method: "PUT",
                 headers: {
                     "Content-type" : "application/json"

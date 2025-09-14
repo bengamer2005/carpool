@@ -9,6 +9,9 @@ import { useSendRequest } from "../hooks/getMutations"
 import { RequestButtons } from "./requestButtons"
 
 const RouteTable = ({drivers, refetch}) => {
+    // conseguimos toda la info del usuario en pantalla
+    const userData = JSON.parse(localStorage.getItem("user"))
+    
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 5
 
@@ -86,7 +89,7 @@ const RouteTable = ({drivers, refetch}) => {
                     }
 
                     mutation.mutate({
-                        idRoute: driver.idUserRoutes, dayRequest: formatDate(selectedDate)
+                        idRoute: driver.idUserRoutes, dayRequest: formatDate(selectedDate), userId: userData.idUsers
                     }, {
                         onSuccess: () => resolve(),
                         onError: (error) => reject(error)
@@ -131,7 +134,7 @@ const RouteTable = ({drivers, refetch}) => {
                                     const { icon, label } = RequestButtons[status]
 
                                     return (
-                                        <button className={`fill-hover-button-${driver.requestStatus}`} disabled={["solicitado", "aceptado", "denegado"].includes(driver.requestStatus)} onClick={() => openCalendar(driver)}>
+                                        <button className={`fill-hover-button-${status}`} disabled={["solicitado", "aceptado", "denegado"].includes(driver.requestStatus)} onClick={() => openCalendar(driver)}>
                                             {icon}
                                             <span>{label}</span>
                                         </button>

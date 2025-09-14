@@ -116,9 +116,9 @@ const formatHour = (time) => {
 const getAllGoingRoute = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         // le hacemos una consulta a todas las rutas de los usuarios que sean de ida
@@ -167,9 +167,9 @@ const getAllGoingRoute = async (req, res) => {
 const getAllReturnRoute = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         // le hacemos una consulta a todas las rutas de los usuarios que sean de ida
@@ -218,9 +218,9 @@ const getAllReturnRoute = async (req, res) => {
 const changeStatus = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         if(!user) {
@@ -260,9 +260,9 @@ const sendRequest = async (req, res) => {
         }
         
         // conseguimos la info del solicitador
-        const USER = process.env.USERNAME
+        const { userId } = req.body
         const userReq = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         // guardamos todos los datos de la solicitud para luego hacer el post
@@ -400,9 +400,9 @@ const getRequest = async (req, res) => {
 const getAcceptedRequest = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
-        const USER = process.env.USERNAME
+        const userId = req.params.id
         const user = await Users.findOne({ 
-            where: { username: USER }
+            where: { idUsers: userId }
         })
 
         // hacemos una consulta para obtener toda la informacion requerida de la solicitud aceptada

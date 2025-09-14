@@ -26,8 +26,27 @@ const registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 
+        // se hace el post del usuario
         const user = await Users.create({ name, username, idRole, email, password: hashedPassword })
-        res.status(200).json(user)
+
+        // extrameos toda la info del usuario
+        const userInfo = await Users.findOne({
+            where: { email: email, username: username }
+        })
+        
+        // generamos el token
+        const token = jwt.sign({
+            id: userInfo.idUsers, 
+            email: userInfo.email,
+            role: userInfo.idRole
+        }, process.env.JWT_SECRET, {
+            expiresIn: "1h"
+        })
+
+        const { password: _, ...userData } = userInfo.dataValues
+
+        res.status(200).json({user, token, userInfo: userData})
+
     } catch (error) {
         res.status(500).json({message: "Ocurrio un error al registrar, error: ", error})
     }

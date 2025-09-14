@@ -8,17 +8,22 @@ import RouteTable from "../components/routesTable"
 const Drivers = () => {
     const [search, setSearch] = useState("")
     const [showReturn, setShowReturn] = useState(false)
+
+    // obtenemos toda la info del usuario en pantalla
+    const userData = JSON.parse(localStorage.getItem("user"))
     
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query de las de ida
     const { data: driversGoing = [], refetch: refetchGoing} = useQuery({
         queryKey: ["goingRoutes"],
-        queryFn: getGoingRoutes
+        queryFn: () => getGoingRoutes(userData.idUsers),
+        enabled: !!userData.idUsers
     })
 
     // usamos useQuery para asignarle el servicio a una queryKey para poder invalidar el query de las de regreso
     const { data: driversReturn = [], refetch: refetchReturn} = useQuery({
         queryKey: ["returnRoutes"],
-        queryFn: getReturnRoutes
+        queryFn: () => getReturnRoutes(userData.idUsers),
+        enabled: !!userData.idUsers
     })
 
     // hacemos la logica del buscador para ambos ida y regreso 

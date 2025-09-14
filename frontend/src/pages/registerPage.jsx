@@ -44,11 +44,19 @@ const RegisterPage = () => {
             name, username, idRole, email, password
         }
 
+        const userData = {
+            name, username, idRole, email
+        }
+
         try {
             // llamamos al servicio 
             const result = await Register(data)
             
             if(result) {
+                // guardamos los datos en localStorage
+                localStorage.setItem("token", result.token);
+                localStorage.setItem("user", JSON.stringify(result.userInfo))  
+
                 // le notificamos al usuario el registro exitoso
                 const swalResult = await Swal.fire({
                     title: "¡Registro exitoso!",
