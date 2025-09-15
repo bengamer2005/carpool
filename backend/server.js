@@ -6,7 +6,7 @@ require("dotenv").config({ path: "./.env" })
 // permitimos solo peticiones de este origen solamente
 const cors = require("cors")
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND,
     // methods: ["GET"],
     credentials: true,
     allowedHeaders: ["Content-Type"]
