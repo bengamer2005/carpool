@@ -17,7 +17,7 @@ const GetUserInfo = () => {
 
     useEffect(() => {
         // hacemos fetch a la api para saber el username del usuario
-        fetch("http://localhost:3000/user")
+        fetch("https://carpool-backend-sldk.onrender.com/user")
         .then((res) => res.json())
         .then((data) => {
             setUsername(data.username)

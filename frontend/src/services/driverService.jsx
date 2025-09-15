@@ -2,7 +2,7 @@
 
 // llamamos todas las rutas del codnuctor
 export const UserRoutes = async (idUsers) => {
-    const response = await fetch(`http://localhost:3000/carpool/driver/getUserRoute/${idUsers}`)
+    const response = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/driver/getUserRoute/${idUsers}`)
     const data = await response.json()
     return data[0]
 }
@@ -10,7 +10,7 @@ export const UserRoutes = async (idUsers) => {
 // cambiamos el estatus de la ruta a activa/inactiva
 export const ChangeStatusRoute = async (idUser) => {
     try {
-        const response = await fetch (`http://localhost:3000/carpool/driver/route/active/${idUser}`, {
+        const response = await fetch (`https://carpool-backend-sldk.onrender.com/carpool/driver/route/active/${idUser}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -32,7 +32,7 @@ export const ChangeStatusRoute = async (idUser) => {
 // deshabilitamos todas las rutas del conductor
 export const DisableAllRoutes = async (idUsers) => {
     try {
-        const response = await fetch (`http://localhost:3000/carpool/driver/allRoute/disable/${idUsers}`, {
+        const response = await fetch (`https://carpool-backend-sldk.onrender.com/carpool/driver/allRoute/disable/${idUsers}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -54,7 +54,7 @@ export const DisableAllRoutes = async (idUsers) => {
 // agregamos una ruta nueva
 export const RegisterRoute = async ({ data, idUsers }) => {
     try {
-        const response = await fetch(`http://localhost:3000/carpool/driver/createRoute/${idUsers}`, {
+        const response = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/driver/createRoute/${idUsers}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -91,7 +91,7 @@ export const updateRequestStatus = async (idRequest, action) => {
             throw new Error("Acción inválida")
         }
 
-        const response = await fetch(`http://localhost:3000/carpool/driver/request/${action}/${idRequest}`, {
+        const response = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/driver/request/${action}/${idRequest}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -99,7 +99,7 @@ export const updateRequestStatus = async (idRequest, action) => {
         })
 
         // llamamos a la solicitud para sacar si esta aceptada o rechazada
-        const request = await fetch(`http://localhost:3000/carpool/passenger/request/${idRequest}`)
+        const request = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/passenger/request/${idRequest}`)
         const requestData = await request.json()
 
         // sacamos es estatus de la solicitud
@@ -121,7 +121,7 @@ export const updateRequestStatus = async (idRequest, action) => {
 // llamamos a todas las solicitudes del conductor
 export const AllDriverRequest = async (idUsers) => {
     try {
-        const response = await fetch(`http://localhost:3000/carpool/driver/request/getAll/${idUsers}`)
+        const response = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/driver/request/getAll/${idUsers}`)
 
         if(!response) {
             throw new Error("Error al llamar las solicitudes del conductor")
@@ -136,7 +136,7 @@ export const AllDriverRequest = async (idUsers) => {
 
 // llama a todos los viajes del conductor
 export const getAllRides = async (idUsers) => {
-    const response = await fetch(`http://localhost:3000/carpool/driver/rides/getAll/${idUsers}`)
+    const response = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/driver/rides/getAll/${idUsers}`)
     const data = await response.json()
 
     // los grupamos por dia

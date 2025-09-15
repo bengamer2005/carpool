@@ -23,7 +23,7 @@ const useSSEListen = (userId) => {
         }
 
         // mandamos el evento y pasamos el userId
-        const eventSource = new EventSource(`http://localhost:3000/sse/events?userId=${userId}`)
+        const eventSource = new EventSource(`https://carpool-backend-sldk.onrender.com/sse/events?userId=${userId}`)
         eventSourceRef.current = eventSource
 
         eventSource.onmessage = (event) => {
