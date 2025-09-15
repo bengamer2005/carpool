@@ -155,7 +155,7 @@ const createRoute = async (req, res) => {
         return res.status(400).json({ errorCode: "START_ABOVE_ARRIVAL", message: "La hora de salida no puede ser mayor a la de llegada" })
     }
 
-    // le sumamos 4 horas al tiempo de salida
+    // le sumamos 3 horas al tiempo de salida
     const [hours, min] = startTime.split(":").map(Number)
     const date = new Date()
 
@@ -164,7 +164,7 @@ const createRoute = async (req, res) => {
 
     const limmitTime = date.toTimeString().slice(0, 5)
 
-    // validamos que el tiempo de llegada no sea mayor a 4 horas despues de la hora de salida
+    // validamos que el tiempo de llegada no sea mayor a 3 horas despues de la hora de salida
     if(arrivalTime > limmitTime) {
         return res.status(400).json({ errorCode: "LIMIT_TIME_EXCEED", message: "La hora de llegada no puede ser mayor a 3 horas despues de la salida" })
     }
@@ -178,7 +178,7 @@ const createRoute = async (req, res) => {
             const startLimitTime = date.toTimeString().slice(0, 5)
             
             if(startTime > startLimitTime) {
-                return res.status(400).json({ errorCode: "START_TIME_EXCEED_GOING", message: "La hora de salida no puede ser mayor a las 8:00 AM" })
+                return res.status(400).json({ errorCode: "START_TIME_EXCEED_GOING", message: "La hora de inicio de viaje no puede ser mayor a las 8:00 AM" })
             }
 
             break
@@ -190,14 +190,14 @@ const createRoute = async (req, res) => {
             console.log("Despues" + returnLimitTime)
             
             if(startTime < returnLimitTime) {
-                return res.status(400).json({ errorCode: "START_TIME_EXCEED_RETURN", message: "La hora de salida no puede ser menor a las 5:00 PM" })
+                return res.status(400).json({ errorCode: "START_TIME_EXCEED_RETURN", message: "La hora de inicio de viaje no puede ser menor a las 5:00 PM" })
             }
 
             break
     }
     
     // se inactivan todas las demas rutas del user del mismo tipo de ruta
-    const updateRouteStatus = DB.query(`
+    const updateRouteStatus = await DB.query(`
         UPDATE UserRoutes
             SET idStatus = 2
         WHERE idRouteWay = :idRouteWay
@@ -206,6 +206,7 @@ const createRoute = async (req, res) => {
         replacements: { idRouteWay: idRouteWay, idUser: getIdUser.idUsers}
     })
 
+    // se hace el registro de la ruta
     try {
         const route = await UserRoutes.create({ startingPoint, arrivalPoint, idStatus, idUsers, idRouteWay, startTime, arrivalTime, routeInfo })
         res.status(200).json(route, updateRouteStatus)

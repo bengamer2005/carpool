@@ -113,6 +113,21 @@ export const CardRides = ({ username, idRoute, dayRequest, startTime, arrivalTim
 // card para los viajes aceptados
 export const CardAcceptedReq = ({ idReq, dayReq, nameDriver, emailDriver, start, arrival, startTime, arrivalTime, nameStatus, routeWay  }) => {
 
+    const subject = "Solicitud de ruta Carpool"
+    const body = "Hola, te contacto respecto a la ruta." 
+
+    const handleSendEmail = () => {
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(emailDriver)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+        const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(emailDriver)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+        const mailtoLink = `mailto:${emailDriver}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+
+        try {
+            window.open(gmailUrl, "_blank") || window.open(outlookUrl, "_blank") || (window.location.href = mailtoLink)
+        } catch (error) {
+            window.location.href = mailtoLink
+        }
+    }
+
     // usamos swal para mostar la info del viaje
     const moreInfo = () => {
         Swal.fire({
@@ -156,7 +171,8 @@ export const CardAcceptedReq = ({ idReq, dayReq, nameDriver, emailDriver, start,
                 <p className="message-accepted-req">Tu solicitud para la ruta de <strong>{routeWay}</strong> del conductor <strong style={{ textTransform: "capitalize" }}>{nameDriver.toLowerCase()}</strong> fue <strong>{nameStatus}</strong></p>
 
                 <div className="actions-accepted-req">
-                    <a className="teams-accepted-req" href={teamsUrl} target="_blank" rel="noopener noreferrer">Mandar mensaje</a>
+                    <button className="teams-accepted-req" onClick={handleSendEmail}>Enviar correo</button>
+                    {/* <a className="teams-accepted-req" href={teamsUrl} target="_blank" rel="noopener noreferrer">Mandar mensaje</a> */}
                     <button className="info-accepted-req" onClick={() => moreInfo()}>Ver info</button>
                 </div>
             </div>
