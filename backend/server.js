@@ -39,7 +39,7 @@ async function testDBConnect() {
 testDBConnect()
 
 // le asignamos el puerto donde correra el servidor
-const port = 3000
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`)
 })
