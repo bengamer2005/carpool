@@ -9,8 +9,7 @@ router.get("/events", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream")
     res.setHeader("Cache-Control", "no-cache")
     res.setHeader("connection", "keep-alive")
-
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173")
+    res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL_PRODUCCION)
     res.setHeader("Access-Control-Allow-Credentials", "true")
 
     res.flushHeaders()

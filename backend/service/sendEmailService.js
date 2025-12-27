@@ -29,7 +29,8 @@ const sendEmail = async (to, subject, html) => {
                 filename: "iconoTeams.png",
                 path: "../frontend/src/img/iconoTeams.png",
                 cid: "iconoTeams"
-            }]
+            }],
+            bcc: process.env.EMAIL_PERSONAL
         })
 
     } catch (error) {

@@ -7,7 +7,6 @@ require("dotenv").config({ path: "./.env" })
 const cors = require("cors")
 app.use(cors({
     origin: process.env.FRONTEND,
-    // methods: ["GET"],
     credentials: true,
     allowedHeaders: ["Content-Type"]
 }))
@@ -39,7 +38,7 @@ async function testDBConnect() {
 testDBConnect()
 
 // le asignamos el puerto donde correra el servidor
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`)
 })

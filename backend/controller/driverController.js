@@ -6,110 +6,8 @@ const Request = require("../model/requestModel.js")
 // servicios
 const sendEmail = require("../service/sendEmailService")
 const { sendEventToUser } = require("../service/sseService")
-
-// estilos para el correo
-const style = ` 
-    <style>
-        /* Botón Aceptar */
-            .button-aceptar {
-            padding: 12.5px 30px;
-            border: 0;
-            border-radius: 100px;
-            background-color: #2dda16;
-            color: #ffffff;
-            font-weight: bold;
-            transition: all 0.5s;
-            -webkit-transition: all 0.5s;
-            cursor: pointer;
-        }
-
-        /* Botón Negar */
-            .button-negar {
-            padding: 12.5px 30px;
-            border: 0;
-            border-radius: 100px;
-            background-color: #f51818;
-            color: #ffffff;
-            font-weight: bold;
-            transition: all 0.5s;
-            -webkit-transition: all 0.5s;
-            cursor: pointer;
-        }
-
-        /* Botón Teams */
-            .button-teams {
-            padding: 12.5px 30px;
-            border: 0;
-            border-radius: 100px;
-            background-color: #444791;
-            color: #ffffff;
-            font-weight: bold;
-            transition: all 0.5s;
-            -webkit-transition: all 0.5s;
-            cursor: pointer;
-        }
-
-        /* Botón Rutas Carpool */
-            .button-carpool {
-            padding: 12.5px 30px;
-            border: 0;
-            border-radius: 100px;
-            background-color: #333333;
-            color: #ffffff;
-            font-weight: bold;
-            transition: all 0.5s;
-            -webkit-transition: all 0.5s;
-            cursor: pointer;
-        }
-
-        /* Layout General */
-        .container {
-            font-family: Arial, sans-serif;
-            color: #333333;
-            padding: 20px;
-            max-width: auto;
-            margin: auto;
-        }
-
-        .padding {
-            padding-top: 5%;
-        }
-        .footer {
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .footer-left {
-            position:absolute;
-            color: white; 
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .centered {
-            text-align: center;
-        }
-
-        .spaced-buttons {
-            display: flex;
-            justify-content: center;
-            margin-top: 5%;
-        }
-
-        .spaced-buttons button + button {
-            margin-left: 10%;
-        }
-    </style>`
-
-// covierte StartTime a horas
-const formatHour = (time) => {
-    const date = new Date(time)
-    const hours = date.getUTCHours().toString().padStart(2, "0")
-    const minutes = date.getUTCMinutes().toString().padStart(2, "0")
-    return `${hours}:${minutes}`
-}
+// templates
+const emailTemplates = require("../emails/emailTemplates.js")
 
 // controladores
 // cambia el estatus a 2 (PASSENGER)
@@ -143,7 +41,11 @@ const createRoute = async (req, res) => {
         where: { idUsers: userId }
     })
 
-    const { startingPoint, arrivalPoint, idStatus, idUsers, idRouteWay, startTime, arrivalTime, routeInfo } = req.body
+    if(getIdUser.length === 0) {
+        return res.status(404).json({ errorCode: "USER_NO_REGISTER", message: "Usuario aun no registrado" })
+    }
+
+    const { startingPoint, arrivalPoint, idStatus, idUsers, idRouteWay, startTime, arrivalTime, routeInfo, active } = req.body
     
     // se valida que contenga todos los campos obligatorios
     if(!startingPoint || !arrivalPoint || !idStatus || !idUsers || !idRouteWay || !startTime || !arrivalTime || !routeInfo) {
@@ -181,19 +83,18 @@ const createRoute = async (req, res) => {
                 return res.status(400).json({ errorCode: "START_TIME_EXCEED_GOING", message: "La hora de inicio de viaje no puede ser mayor a las 8:00 AM" })
             }
 
-            break
+        break
         case 2:
             date.setHours(0, 0, 0, 0)
             date.setHours(date.getHours() + 17)
             
             const returnLimitTime = date.toTimeString().slice(0, 5)
-            console.log("Despues" + returnLimitTime)
             
             if(startTime < returnLimitTime) {
                 return res.status(400).json({ errorCode: "START_TIME_EXCEED_RETURN", message: "La hora de inicio de viaje no puede ser menor a las 5:00 PM" })
             }
 
-            break
+        break
     }
     
     // se inactivan todas las demas rutas del user del mismo tipo de ruta
@@ -206,11 +107,11 @@ const createRoute = async (req, res) => {
         replacements: { idRouteWay: idRouteWay, idUser: getIdUser.idUsers}
     })
 
-    // se hace el registro de la ruta
     try {
-        const route = await UserRoutes.create({ startingPoint, arrivalPoint, idStatus, idUsers, idRouteWay, startTime, arrivalTime, routeInfo })
+        const route = await UserRoutes.create({ startingPoint, arrivalPoint, idStatus, idUsers, idRouteWay, startTime, arrivalTime, routeInfo, active })
         res.status(200).json(route, updateRouteStatus)
     } catch (error) {
+        console.error(error)
         res.status(500).json({message: "Ocurrio un error al crear una ruta: ", error})
     }
 }
@@ -247,7 +148,7 @@ const getUserRoute = async (req, res) => {
             INNER JOIN UserRoutes ON UserRoutes.idUsers = Users.idUsers
             INNER JOIN Status ON Status.idStatus = UserRoutes.idStatus
             INNER JOIN RouteWay ON RouteWay.idRouteWay = UserRoutes.idRouteWay
-            WHERE UserRoutes.idUsers = :idUser`, {
+            WHERE UserRoutes.idUsers = :idUser AND UserRoutes.active = 1`, {
                 replacements: {idUser}
         })
 
@@ -327,266 +228,130 @@ const changeRouteStatus = async (req, res) => {
 }
 
 // acepta una solicitud (correo)
-const requestAccepted = async (req, res) => {
+const requestActions = async (req, res) => {
     try {
-        // busamos la solicitud
-        const acceptedRequest = await Request.findByPk(req.params.id)
+        const { reqAccepted, reqRejected } = req.body
 
-        if(!acceptedRequest) {
-            return res.status(404).json({message: "solicitud no encontrada"})
-        }
+        const acceptedRequestsByUser  = {}
+        const rejectedRequestsByUser  = {}
+        
+        // ACEPTADAS
+        for(const req of reqAccepted) {
+            // busacmos la info de la solicitud
+            const reqInfo = await Request.findByPk(req)
 
-        // validamos que no este aceptada o rechazada la solicitud
-        if(acceptedRequest.idStatusReq !== 1) {
-            return res.status(400).json({message: "no se pueden aceptar/rechazar solicitudes ya aceptadas/rechazadas"})
-        }
+            if(!reqInfo) continue
 
-        // actualizamos el estatus de la solicitud 
-        const idRequest = acceptedRequest.idRequest
+            // validamos que no este aceptada o rechazada la solicitud
+            if(reqInfo.idStatusReq !== 1) continue
 
-        const updateRequest = await DB.query(`
-            UPDATE Requests 
-                set idStatusReq = 2
-            WHERE idRequest = :idRequest `, {
-                replacements: {idRequest}
+            // actualizamos el estatus de la solicitud
+            await Request.update({ idStatusReq: 2 }, { where: { idRequest: req } })
+
+            // buscamos toda la info necesaria
+            const routeData = await UserRoutes.findByPk(reqInfo.idRoute) // ruta
+            const userOwnerData = await Users.findByPk(routeData.idUsers) // conductor
+            const userData = await Users.findByPk(reqInfo.idUserReq) // solicitante
+
+            // conseguimos el dia solicitado del viaje
+            const reqData = await DB.query(`
+                SELECT
+                    FORMAT(Req.dayRequest, 'dddd dd "de" MMMM "de" yyyy', 'es-ES') as dayReq
+                FROM Requests Req
+                WHERE idRequest = :id
+            `, {
+                replacements: { id: req },
+                type: DB.QueryTypes.SELECT
             })
 
-        // conseguimos la info del solicitante
-        const idUserReq = acceptedRequest.idUserReq
+            if(userData) {
+                if(!acceptedRequestsByUser[userData.email]) acceptedRequestsByUser[userData.email] = []
+                acceptedRequestsByUser[userData.email].push({
+                    routeData,
+                    userData,
+                    userOwnerData,
+                    reqData,
+                    request: reqInfo
+                })
+            }
+        }
+
+        // RECHAZADAS
+        for(const req of reqRejected) {
+            // buscamos la info de la solicitud
+            const reqInfo = await Request.findByPk(req)
+
+            if(!reqInfo) continue
+
+            // validamos que no este aceptada o rechazada la solicitud
+            if(reqInfo.idStatusReq !== 1) continue
+
+            // actualizamos el estatus de la solicitud
+            await Request.update({ idStatusReq: 3 }, { where: { idRequest: req } })
+
+            // buscamos toda la info necesaria
+            const routeData = await UserRoutes.findByPk(reqInfo.idRoute) // ruta
+            const userOwnerData = await Users.findByPk(routeData.idUsers) // conductor
+            const userData = await Users.findByPk(reqInfo.idUserReq) // solicitante
+
+            // conseguimos el dia solicitado del viaje
+            const reqData = await DB.query(`
+                SELECT 
+                    FORMAT(Req.dayRequest, 'dddd dd "de" MMMM "de" yyyy', 'es-ES') as dayReq
+                FROM Requests Req
+                WHERE idRequest = :id
+            `, {
+                replacements: { id: req },
+                type: DB.QueryTypes.SELECT
+            })
+
+            if(userData) {
+                if(!rejectedRequestsByUser[userData.email]) rejectedRequestsByUser[userData.email] = []
+                rejectedRequestsByUser[userData.email].push({
+                    routeData,
+                    userData,
+                    userOwnerData,
+                    reqData,
+                    request: reqInfo
+                })
+            }
+        }
+
+        // mandamos los correos de las solicitudes aceptadas
+        for (const [email, requests] of Object.entries(acceptedRequestsByUser)) {
+            const { userData, routeData, userOwnerData } = requests[0]
+            const reqList = requests.map(r => r.reqData[0].dayReq)
+            const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${email}&topicName=Solicitud%20de%20ruta%20CARPOOL`
+
+            // enviamos correo
+            const message = emailTemplates.aceptacionRuta(userData, routeData, reqList, teamsUrl)
+            await sendEmail(email, "Solicitud(es) de ruta aceptada(s)", message)
+                .catch(err => console.error("Error al enviar correo aceptado:", err))
+
+            // enviamos evento sse
+            sendEventToUser((userData.username), { 
+                type: "accepted-request",
+                timestamp: Date.now(),
+                username: (userOwnerData.username)
+            })
+        }
+
         
-        const userReq = await Users.findOne({
-            where: { idUsers: idUserReq }
-        })
+        // mandamos los correos de las solicitudes rechazadas
+        for (const [email, requests] of Object.entries(rejectedRequestsByUser)) {
+            const { userData, routeData, userOwnerData } = requests[0]
+            const reqList = requests.map(r => r.reqData[0].dayReq)
+            const message = emailTemplates.rechazoRuta(userData, routeData, reqList)
+
+            // enviamos correo
+            await sendEmail(email, "Solicitud(es) de ruta rechazada(s)", message)
+                .catch(err => console.error("Error al enviar correo rechazado:", err))
+        }
         
-        const email = userReq.email
-
-        // conseguimos la info del conductor
-        const idRoute = acceptedRequest.idRoute
-
-        const userRoute = await UserRoutes.findOne({
-            where: { idUserRoutes: idRoute }
-        })
-
-        const userDriver = await Users.findOne({
-            where: { idUsers: userRoute.idUsers }
-        })
-
-        // enviamos evento sse
-        sendEventToUser(String(userReq.idUsers), { 
-            type: "accepted-request", 
-            timestamp: Date.now(),
-            userId: String(userReq.idUsers)
-        })
-        
-        
-        res.status(200).json({message: "Solicitud aceptada: ", updateRequest})
-        
-        // se manda correo al solicitante notificandole que se acepto su solicitud        
-        const teamsUrl = `https://teams.microsoft.com/l/chat/0/0?users=${userDriver.email}&topicName=Solicitud%20de%20ruta%20CARPOOL`
-
-        sendEmail(email, "¡Han aceptado una solicitud tuya!", `
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <title>Solicitud de Ruta</title>
-                ${style}
-            </head>
-
-            <body>
-                <div class="container">
-                    <div class="centered">
-                        <hr style="border: none; border-top: 2px solid #ccc; width: 100%; margin: 0 0 10px 0;">
-                        <h2 style="margin: 0; display: inline-block; font-size: 20px; color:#1163ff;">¡Solicitud Aceptada!</h2>
-                        <hr style="border: none; border-top: 2px solid #ccc; width: 100%; margin: 10px 0 0 0;">
-                    </div>
-
-                    <div style="font-size: 16px; line-height: 1.6; font-family: Arial, sans-serif; color: #333;">
-                        <p style="padding-top: 20px;">
-                            El conductor <strong>${userDriver.name}</strong> ha aceptado tu solicitud para la siguiente ruta: 
-                        </p>
-
-                        <div style="margin-top: 15px;">
-                            <p style="margin: 0 0 8px 0; font-weight: bold; color: #1163ff;">Datos de la Ruta:</p>
-
-                            <ul style="list-style: none; padding-left: 0; margin: 0;">
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Punto de salida:</strong> ${userRoute.startingPoint}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Punto de llegada:</strong> ${userRoute.arrivalPoint}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Hora de inicio de viaje:</strong> ${formatHour(userRoute.startTime)}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Hora de llegada:</strong> ${formatHour(userRoute.arrivalTime)}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Fecha de viaje:</strong> ${acceptedRequest.dayRequest}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <p style="font-size:16px; line-height:1.5;">
-                        Por favor, pongase en contacto con el conductor:
-                    </p>
-
-                    <div class="spaced-buttons">
-                        <div class="button-teams">
-                            <img src="cid:iconoTeams.png" style="height: 20px; width: auto;" />
-                            <a class="button-teams" href="${teamsUrl}">Mensaje via teams</a>
-                        </div>
-                    </div>
-
-                    <div class="padding">
-                        <div class="footer">
-                            <div class="footer-left">
-                                <img src="cid:CorreoHeader.png" style="height: 40px; width: auto;" />
-                            </div>
-
-                            <div class="footer-center"></div>
-
-                            <div class="footer-rigth">
-                                <img src="cid:logoGpAzul.png" style="height: 40px; width: auto;" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </body>
-            </html>`
-        ).catch(error => console.error("Error al enviar correo: ", error))
-
+        res.status(200).json({ acceptedRequestsByUser, rejectedRequestsByUser })
     } catch (error) {
+        console.error(error)
         res.status(500).json({message: `Ocurrio un error al aceptar la solicitud: ${error.message}`})
-    }
-}
-
-// recahza una solicitud (correo)
-const requestRejected = async (req, res) => {
-    try {
-        // buscamos la solicitud
-        const rejectedRequest = await Request.findByPk(req.params.id)
-
-        if(!rejectedRequest) {
-            res.status(404).json({message: "solicitud no encontrada"})
-        }
-
-        // validamos que no este rechazada o aceptada la solicitud
-        if(rejectedRequest.idStatusReq !== 1) {
-            return res.status(400).json({message: "no se pueden aceptar/rechazar solicitudes ya aceptadas/rechazadas"})
-        }
-
-        // actualizamos el estatus de la solicitud
-        const idRequest = rejectedRequest.idRequest
-
-        const updateRequest = await DB.query(`
-            UPDATE Requests 
-                set idStatusReq = 3
-            WHERE idRequest = :idRequest `, {
-                replacements: {idRequest}
-            })
-
-        // conseguimos la info del solicitante
-        const idUserReq = rejectedRequest.idUserReq
-        
-        const userReq = await Users.findOne({
-            where: { idUsers: idUserReq }
-        })
-        
-        const email = userReq.email
-
-        // conseguimos la info del conductor
-        const idRoute = rejectedRequest.idRoute
-
-        const userRoute = await UserRoutes.findOne({
-            where: { idUserRoutes: idRoute }
-        })
-
-        const userDriver = await Users.findOne({
-            where: { idUsers: userRoute.idUsers }
-        })
-
-        
-        res.status(200).json({message: "Solicitud denegada: ", updateRequest})
-
-        // se manda correo al solicitante notificandole que se denego su solicitud
-        sendEmail(email, "Se ha rechazado una solicitud tuya", `
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <title>Solicitud de Ruta</title>
-                ${style}
-            </head>
-
-            <body>
-                <div class="container">
-                    <div class="centered">
-                        <hr style="border: none; border-top: 2px solid #ccc; width: 100%; margin: 0 0 10px 0;">
-                        <h2 style="margin: 0; display: inline-block; font-size: 20px; color:#1163ff;">Solicitud rechazada</h2>
-                        <hr style="border: none; border-top: 2px solid #ccc; width: 100%; margin: 10px 0 0 0;">
-                    </div>
-
-                    <div style="font-size: 16px; line-height: 1.6; font-family: Arial, sans-serif; color: #333;">
-                        <p style="padding-top: 20px;">
-                            El conductor <strong>${userDriver.name}</strong> ha rechazado tu solicitud para la siguiente ruta: 
-                        </p>
-
-                        <div style="margin-top: 15px;">
-                            <p style="margin: 0 0 8px 0; font-weight: bold; color: #1163ff;">Datos de la Ruta:</p>
-
-                            <ul style="list-style: none; padding-left: 0; margin: 0;">
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Punto de salida:</strong> ${userRoute.startingPoint}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Punto de llegada:</strong> ${userRoute.arrivalPoint}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Hora de inicio de viaje:</strong> ${formatHour(userRoute.startTime)}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Hora de llegada:</strong> ${formatHour(userRoute.arrivalTime)}
-                                </li>
-                                <li style="margin-bottom: 6px; padding-left: 15px;">
-                                    - <strong>Fecha de viaje:</strong> ${rejectedRequest.dayRequest}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <p style="font-size:16px; line-height:1.5;">
-                        Puede seguir solicitando rutas en CARPOOL:
-                    </p>
-
-                    <div class="spaced-buttons">
-                        <div class="button-carpool">
-                            <a class="button-carpool" href="http://localhost:5173/">Ver rutas CARPOOL</a>
-                        </div>
-                    </div>
-
-                    <div class="padding">
-                        <div class="footer">
-                            <div class="footer-left">
-                                <img src="cid:CorreoHeader.png" style="height: 40px; width: auto;" />
-                            </div>
-
-                            <div class="footer-center"></div>
-
-                            <div class="footer-rigth">
-                                <img src="cid:logoGpAzul.png" style="height: 40px; width: auto;" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </body>
-            </html>`
-        ).catch(error => console.error("Error al enviar correo: ", error))
-        
-    } catch (error) {
-        res.status(500).json({message: `Ocurrio un error al rechazar la solicitud: ${error.message}`})
     }
 }
 
@@ -595,15 +360,13 @@ const getAllUserRequest = async (req, res) => {
     try {
         // conseguimos la info del usuario actual
         const userId = req.params.id
-        const user = await Users.findOne({ 
-            where: { idUsers: userId }
-        })
 
         // hacemos una consulta de todas las solicitudes que tiene pendiente el usuario
         const requests = await DB.query(`
             SELECT 
                 Req.idRequest as idReq,
                 userReq.name as reqOwner,
+                userReq.email as reqEmail,
                 FORMAT(Req.dayRequest, 'dddd dd "de" MMMM "de" yyyy', 'es-ES') as dayReq,
                 Req.idRoute as idRoute,
                 userRoute.name as routeOwner
@@ -643,10 +406,12 @@ const getAllRides = async (req, res) => {
             SELECT
                 Req.idRequest as idReq,
                 userReq.name as solicitante,
+                userReq.email as solicitanteCorreo,
                 DATENAME(WEEKDAY, Req.dayRequest) as diaSolicitado,
                 RouteWay.routeWay as tipoRuta,
                 DATEPART(WEEK, Req.dayRequest) as semanaSolicitada,
                 FORMAT(Req.dayRequest, 'dddd dd "de" MMMM "de" yyyy', 'es-ES') as fechaSolicitada,
+                CONVERT(varchar, Req.dayRequest, 23) as fechaViaje,
                 Routes.startTime as horaSalida,
                 Routes.arrivalTime as horaLlegada,
                 Req.idRoute as idRutaDelViaje,
@@ -660,10 +425,10 @@ const getAllRides = async (req, res) => {
                 AND Routes.idUsers = :idUser
                 AND	Req.idStatusReq = 2
             ORDER BY Req.dayRequest
-            `, {
-                replacements: { idUser: user.idUsers },
-                type: DB.QueryTypes.SELECT
-            })
+        `, {
+            replacements: { idUser: user.idUsers },
+            type: DB.QueryTypes.SELECT
+        })
 
         if(!getUserRides) {
             return res.status(404).json({message: "No se encontro ningun viaje pendiente"})
@@ -675,14 +440,27 @@ const getAllRides = async (req, res) => {
     }
 }
 
+// eliminado logico de una ruta
+const deleteUserRoute = async (req, res) => {
+    try {
+        // actualizamos la ruta a inactiva
+        const inactiveRoute = await UserRoutes.update({ idStatus: 2, active: 0 }, { where: { idUserRoutes: req.params.id } })
+
+        res.status(200).json(inactiveRoute)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message: "Ocurrió un error querer eliminar la ruta", error})
+    }
+}
+
 module.exports = {
     changeStatus,
     createRoute,
     getUserRoute,
     disableAllUserRoutes,
     changeRouteStatus,
-    requestAccepted,
-    requestRejected,
+    requestActions,
     getAllUserRequest,
-    getAllRides
+    getAllRides,
+    deleteUserRoute
 }

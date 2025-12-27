@@ -22,6 +22,9 @@ const Request = sequelize.define("Request", {
     },
     dayRequest: {
         type: DataTypes.DATE
+    },
+    confirmation: {
+        type: DataTypes.INTEGER
     }
 }, {
     timestamps: false

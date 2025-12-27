@@ -31,6 +31,9 @@ const UserRoutes = sequelize.define("UserRoutes", {
     },
     routeInfo: {
         type: DataTypes.STRING
+    },
+    active: {
+        type: DataTypes.INTEGER
     }
 }, {
     timestamps: false
