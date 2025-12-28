@@ -1,13 +1,27 @@
 import { useState } from "react"
+import { Calendar, momentLocalizer } from "react-big-calendar"
+import moment from "moment"
+import Swal from "sweetalert2"
 import { useQuery } from "@tanstack/react-query"
+import { Notyf } from "notyf"
 // servicios
 import { getAllAcceptedReq } from "../services/passengerService"
-// componentes
-import { CardAcceptedReq } from "../components/cards"
+import { useConfirmRide } from "./getMutations"
 // img
 import noSolicitudes from "../img/noSolicitudesFeedBack.png"
 
+const notyf = new Notyf({
+    position: { x: "right", y: "bottom" },
+    duration: 5000
+})
+
+moment.locale("es")
+const localizer = momentLocalizer(moment)
+
 const AcceptedReq = () => {
+    const mutation = useConfirmRide()
+    const [completed, setCompleted] = useState({})
+
     // conseguimos toda la info del user en pantalla
     const userData = JSON.parse(localStorage.getItem("user"))
 
@@ -17,16 +31,6 @@ const AcceptedReq = () => {
         queryFn: () => getAllAcceptedReq(userData.idUsers),
         enabled: !!userData.idUsers
     })
-
-    // le asignamos un estado a las const y ponemos un limite de cards por pagina
-    const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage = 3
-
-    // logica de la paginacion 
-    const totalPages = Math.ceil(acceptedReq.length / itemsPerPage)
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const currentAcceptedReq = acceptedReq.slice(startIndex, endIndex)
 
     // le damos formato a la hora
     const time = (timeString) => {
@@ -52,67 +56,197 @@ const AcceptedReq = () => {
         )
     }
 
+    // se agrega como eventos todos los viajes aceptados del pasajero
+    const events = acceptedReq.map((req) => ({
+        id: req.idReq,
+        title: `Viaje: ${req.nameDriver}`,
+        start: new Date(`${req.fechaViaje}T00:00:00`),
+        end: new Date(`${req.fechaViaje}T23:59:59`),
+        reqData: req,
+        isConfirmed: req.confirmation === 1,
+        date: req.fechaViaje,
+        tipo: req.routeWay
+    }))
+
+    const handleEventClick = (event) => {
+        Swal.fire({
+            title: "Información del viaje",
+            // usamos la clase driverName para capitalizar el nombre del solicitante y toLowerCase para pasarlo a minusculas
+            html: `
+            <style>
+                .driverName {
+                    text-transform: capitalize;
+                }
+            </style>
+            
+            <br></br> Conductor: <strong class="driverName">${event.reqData.nameDriver.toLowerCase()}</strong>  
+            <br></br> Fecha solicitada: <strong>${event.reqData.dayReq}</strong>
+            <br></br> Punto de salida: <strong>${event.reqData.start}</strong>
+            <br></br> Punto de llegada: <strong>${event.reqData.arrival}</strong>
+            <br></br> Hora de salida: <strong>${time(event.reqData.startTime)}</strong>
+            <br></br> Hora de llegada estimada: <strong>${time(event.reqData.arrivalTime)}</strong>
+            <br></br> Tipo de viaje: <strong>${event.reqData.routeWay}</strong>`,
+
+            confirmButtonText: "Contactar conductor",
+            showCancelButton: true,
+            cancelButtonText: "Cerrar",
+            icon: "info"
+        }).then((result) => {
+            if(result.isConfirmed) {
+                window.open(`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(event.reqData.emailDriver)}&topicName=${encodeURIComponent("Viaje pendiente en Carpool")}`)
+            }
+        })
+    }
+
+    // agregamos el handle para los checkbox
+    const handleCheckboxChange = (id, checked, date, tipo, isConfirmed) => {
+        setCompleted((prev) => {
+            const updated = { ...prev }
+
+            if(isConfirmed) {
+                return notyf.error("No se puede confirmar ya que confirmaste otra del mismo tipo")
+            }
+
+            // desmarcar otros viajes del mismo día y mismo tipo
+            for (const key in updated) {
+                const ev = events.find(e => e.id == key)
+
+                if (ev && ev.date === date && ev.tipo === tipo) {
+                    updated[key] = false
+                }
+            }
+
+            // marcar solo el que dio clic
+            updated[id] = checked
+
+            return updated
+        })
+    }
+
+    // agregamos un evento con el checkbox
+    const CustomEvent = ({ event }) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {!event.isConfirmed && (
+                <input type="checkbox" checked={completed[event.id] || false} onChange={(e) => handleCheckboxChange(event.id, e.target.checked, event.date, event.tipo, event.isConfirmed)} onClick={(e) => e.stopPropagation()}/>
+            )}
+            <span style={{ textDecoration: completed[event.id] ? "line-through" : "none", opacity: completed[event.id] ? 0.6 : 1, }}>
+                {event.title}
+            </span>
+        </div>
+    )
+    
+    const handleMarkCompleted = () => {
+        const marked = Object.keys(completed).filter((id) => completed[id])
+
+        if(marked.length === 0) {
+            return notyf.error("Marca al menos un viaje como completado")
+        }
+
+        Swal.fire({
+            title: "Confirmando viajes...",
+            text: "Por favor espere un momento",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading()
+            }
+        })
+
+        // hacemos el llamado a la api mandando los datos
+        const rides = marked
+        
+        mutation.mutate(rides, {
+            onSuccess: () => {
+                Swal.fire({
+                    title: "Viajes confirmados",
+                    text: `Haz marcado ${marked.length} viaje(s) como completados.`,
+                    icon: "success"
+                }).then(() => {
+                    // sse limpian los estados al final
+                    setCompleted({})
+                })
+            },
+            onError: (error) => {
+                Swal.fire({
+                    title: "Error",
+                    text: error.message || "Ocurrió un problema al querer confirmar los viajes.",
+                    icon: "error",
+                    confirmButtonText: "Cerrar"
+                })
+                console.error("Error al hacer el refetch de las solicitudes de los conductores: ", error)
+            }
+        })
+    }
+
     return (
         <>
             <h2 className="title">MIS SOLICITUDES ACEPTADAS</h2>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "20px", margin: "0.5%" }}>
-
-                {/* botones para la paginacion IZQ*/}
-                <div style={{ position: "sticky", top: "100px" }}>
-                    <button className="button-acceptedReq" onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))} disabled={currentAcceptedReq === 1}>
-                        <div className="button-box-acceptedReq">
-                            <span className="button-elem-acceptedReq">
-                                <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"></path>
-                                </svg>
-                            </span>
-                            <span className="button-elem-acceptedReq">
-                                <svg viewBox="0 0 46 40">
-                                    <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"></path>
-                                </svg>
-                            </span>
-                        </div>
+            <div style={{ position: "relative" }}>
+                <div className="rbc-toolbar" style={{ position: "absolute", top: 0, right: "10%", zIndex: 10}}>
+                    <button type="button" className="rbc-button-link" onClick={handleMarkCompleted}>
+                        Marcar completados
                     </button>
                 </div>
 
-                {/* se muestran los datos del array con CardAcceptedReq */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center", flexGrow: 1 }}>
-                    {currentAcceptedReq.map((req) => (
-                        <CardAcceptedReq
-                        key={req.idReq}
-                        nameDriver={req.nameDriver}
-                        start={req.start}
-                        arrival={req.arrival}
-                        startTime={time(req.startTime)}
-                        arrivalTime={time(req.arrivalTime)}                    
-                        nameStatus={req.nameStatus}
-                        routeWay={req.routeWay}
-                        dayReq={req.dayReq}
-                        emailDriver={req.emailDriver}/>
-                    ))}
+                <div style={{ height: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Calendar
+                    localizer={localizer}
+                    events={events}
+                    views={["month"]}
+                    defaultView="month"
+                    selectable
+                    onSelectSlot={handleEventClick}
+                    onSelectEvent={handleEventClick}
+                    showAllEvents
+                    components={{
+                        event: CustomEvent
+                    }}
+                    eventPropGetter={(event) => {
+                        let backgroundColor = ""
+
+                        if (event.tipo === "entrada") {
+                            backgroundColor = "#8AD3F8"
+                            if(event.isConfirmed) {
+                                backgroundColor = "#c8f8a3ff"
+                            }
+                        } else if (event.tipo === "salida") {
+                            backgroundColor = "#F8A3C9"
+                            if(event.isConfirmed) {
+                                backgroundColor = "#c8f8a3ff"
+                            }
+                        }
+
+                        return {
+                            style: {
+                                backgroundColor,
+                                borderRadius: "8px",
+                                border: "none",
+                                color: "#000",
+                                padding: "4px",
+                                fontWeight: 600
+                            }
+                        }
+                    }}
+                    style={{ height: "100%", width: "80%" }}/>
                 </div>
 
-                {/* botones para la paginacion DER*/}
-                <div style={{ position: "sticky", top: "100px" }}>
-                    <button className="button-acceptedReq" style={{ transform: "rotate(180deg)" }} onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))} disabled={currentAcceptedReq === totalPages} >
-                        <div className="button-box-acceptedReq">
-                            <span className="button-elem-acceptedReq">
-                                <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"></path>
-                                </svg>
-                            </span>
-                            <span className="button-elem-acceptedReq">
-                                <svg viewBox="0 0 46 40">
-                                    <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"></path>
-                                </svg>
-                            </span>
-                        </div>
-                    </button>
+                <div className="calendar-legend">
+                    <div className="legend-item">
+                        <span className="legend-color entrada"></span>
+                        Entrada
+                    </div>
+                    <div className="legend-item">
+                        <span className="legend-color salida"></span>
+                        Salida
+                    </div>
+                    <div className="legend-item">
+                        <span className="legend-color aprobada"></span>
+                        Confirmadas
+                    </div>
                 </div>
 
             </div>
-
         </>
     )
 }

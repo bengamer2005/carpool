@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { Notyf } from "notyf"
 import { DisableAllRoutes, ChangeStatusRoute, UserRoutes } from "../services/driverService"
+import { useSetNotVisibleRoute } from "./getMutations"
 import Swal from "sweetalert2"
+
+const notyf = new Notyf({
+    position: { x: "right", y: "bottom" },
+    duration: 5000,
+})
 
 const DriversRoute = () => {
     const [search, setSearch] = useState("")
@@ -10,12 +17,40 @@ const DriversRoute = () => {
     // obtenemos toda la info del usuario en pantalla
     const userData = JSON.parse(localStorage.getItem("user"))
 
+    const { mutate } = useSetNotVisibleRoute()
+
     // hacemos una funcion con swal para mostrar los comentarios de una ruta en forma de modal
     const openRouteinfo = (info) => {
         Swal.fire({
             title: "Comentarios de la ruta",
             text: info,
             confirmButtonText: "cerrar"
+        })
+    }
+
+    // handle para eliminar ruta
+    const handleDeleteRoute = async (idUserRoutes) => {
+        Swal.fire({
+            icon: "warning",
+            title: "¿Deseas eliminar esta ruta?",
+            text: "Al eliminar la ruta ya no se podrá recuperar",
+            confirmButtonColor: "#ef4444",
+            confirmButtonText: "Eliminar",
+            showCancelButton: true,
+            cancelButtonText: "Conservar ruta",
+            cancelButtonColor: "#818181ff",
+            iconColor: "#ef4444"
+        }).then((result) => {
+            if(result.isConfirmed) {
+                mutate({
+                    idUserRoute: idUserRoutes
+                }, {
+                    // si todo sale bien le decimos al conductor que todo salio bien y cual fue su accion 
+                    onSuccess: () => {
+                        notyf.success("Ruta eliminada con éxito")
+                    }
+                })
+            }
         })
     }
 
@@ -92,7 +127,7 @@ const DriversRoute = () => {
                 </div>
 
                 {/* tabla con todas las rutas y su info */}
-                <table className="users-table" border={1} cellPadding={10}>
+                <table className="users-table-driver" border={1} cellPadding={10}>
                     <thead>
                         <tr>
                             <th>ID </th>
@@ -110,7 +145,20 @@ const DriversRoute = () => {
                     <tbody>
                         {valueToSearch.map((driver) => (
                             <tr key={driver.idUserRoutes}>
-                                <td>{driver.idUserRoutes}</td>
+                                <td>
+                                    <div className="id-cell-container" onClick={() => handleDeleteRoute(driver.idUserRoutes)}>
+                                        <div className="id-content">
+                                            <span className="id-number">{driver.idUserRoutes}</span>
+                                            <span className="delete-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
                                 <td>{driver.startingPoint}</td>
                                 <td>{driver.arrivalPoint}</td>
                                 <td>{time(driver.startTime)}</td>

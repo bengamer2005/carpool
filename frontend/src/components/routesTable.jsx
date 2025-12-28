@@ -1,8 +1,7 @@
 import { useState } from "react"
 import ReactDOM from "react-dom/client"
 import Swal from "sweetalert2"
-import Calendar from "react-calendar"
-import "react-calendar/dist/Calendar.css"
+import { Calendar } from "react-multi-date-picker"
 // hooks
 import { useSendRequest } from "../hooks/getMutations"
 // componentes
@@ -55,8 +54,8 @@ const RouteTable = ({drivers, refetch}) => {
         const root = ReactDOM.createRoot(container)
         let selectedDate = null
 
-        root.render(<Calendar minDate={new Date()} maxDate={addDays(new Date(), 13)} onChange={(dayRequest) => {
-            selectedDate = dayRequest
+        root.render(<Calendar multiple minDate={new Date()} maxDate={addDays(new Date(), 20)} style={{ fontSize: "1.5rem", padding: "20px" }} onChange={(daysSelected) => {
+            selectedDate = Array.isArray(daysSelected) ? daysSelected.map((day) => day.toDate()) : [daysSelected.toDate()]
         }}/>)
 
         Swal.fire({
@@ -71,15 +70,10 @@ const RouteTable = ({drivers, refetch}) => {
 
             willClose: () => root.unmount(),
             preConfirm: async () =>  {
-                if(!selectedDate) {
+                if(!selectedDate || selectedDate.length === 0) {
                     Swal.showValidationMessage("Debe seleccionar una fecha")
                     return false
-                }
-
-                if(selectedDate.getDay() === 6 || selectedDate.getDay() === 0) {
-                    Swal.showValidationMessage(`No se puede solicitar una ruta en ${selectedDate.getDay() === 6 ? "Sabado" : "Domingo"}`)
-                    return false
-                }                
+                }              
 
                 Swal.showLoading()
 
@@ -89,7 +83,7 @@ const RouteTable = ({drivers, refetch}) => {
                     }
 
                     mutation.mutate({
-                        idRoute: driver.idUserRoutes, dayRequest: formatDate(selectedDate), userId: userData.idUsers
+                        idRoute: driver.idUserRoutes, dayRequest: selectedDate.map(formatDate), userId: userData.idUsers
                     }, {
                         onSuccess: () => resolve(),
                         onError: (error) => reject(error)
@@ -130,11 +124,10 @@ const RouteTable = ({drivers, refetch}) => {
                             <td>{time(driver.arrivalTime)}</td>
                             <td>
                                 {(() => {
-                                    const status = driver.requestStatus
-                                    const { icon, label } = RequestButtons[status]
+                                    const { icon, label } = RequestButtons[null]
 
                                     return (
-                                        <button className={`fill-hover-button-${status}`} disabled={["solicitado", "aceptado", "denegado"].includes(driver.requestStatus)} onClick={() => openCalendar(driver)}>
+                                        <button className={`fill-hover-button-null`} onClick={() => openCalendar(driver)}>
                                             {icon}
                                             <span>{label}</span>
                                         </button>

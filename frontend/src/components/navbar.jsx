@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router"
 import Swal from "sweetalert2"
+const APIs = import.meta.env.VITE_API_URL
 
 const Navbar = () => {
     const changePage = useNavigate()
@@ -10,7 +11,7 @@ const Navbar = () => {
     const pageDriver = page.pathname === "/conductor"
     const pagePassenger = page.pathname === "/pasajero"
 
-    const handleRole = async (role, rolePage, userId) => {
+    const handleRole = async (role, rolePage) => {
 
         // se usa swal para preguntar el cambio de roles
         const changeRole = await Swal.fire({
@@ -29,7 +30,7 @@ const Navbar = () => {
 
         // intentamos hacer el cambio de rol
         try {
-            const response = await fetch(`https://carpool-backend-sldk.onrender.com/carpool/${role}/changeStatus/${userInfo.idUsers}`, {
+            const response = await fetch(`${APIs}/carpool/${role}/changeStatus/${userInfo.idUsers}`, {
                 method: "PUT",
                 headers: {
                     "Content-type" : "application/json"

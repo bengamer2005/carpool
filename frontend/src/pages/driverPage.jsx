@@ -67,6 +67,7 @@ const Driver = () => {
     const [routeInfoReturn, setRouteInfoReturn] = useState("")
     const idRouteWayReturn = 2
     const idStatus = 1
+    const active = 1
 
     const handleWaypointChange = async (waypoints, setStartFn, setArrivalFn) => {
         const [startLatLng, endLatLng] = waypoints
@@ -94,7 +95,8 @@ const Driver = () => {
             arrivalTime,
             idUsers: userData.idUsers,
             idRouteWay,
-            routeInfo
+            routeInfo,
+            active
         }
 
         try {

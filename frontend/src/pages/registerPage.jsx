@@ -125,6 +125,7 @@ const RegisterPage = () => {
             notyf.error(error.message || "Ocurrió al registrarse")
         }
     }
+    
     return (
         <>
             <Header/>

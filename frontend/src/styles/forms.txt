@@ -99,14 +99,6 @@
   width: 100%;
 }
 
-.button-container-send-answer {
-  display: flex;
-  justify-content: end;
-  flex-wrap: wrap;
-  gap: 1em;
-  width: 100%;
-}
-
 .button {
   --main-focus: #2d8cf0;
   --font-color: #323232;

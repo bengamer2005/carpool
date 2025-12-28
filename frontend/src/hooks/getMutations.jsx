@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 // servicios
-import { RegisterRoute } from '../services/driverService'
-import { sendRequest } from "../services/passengerService"
+import { RegisterRoute, setNotVisibleRoute } from '../services/driverService'
+import { sendRequest, confirmRide } from "../services/passengerService"
 import { updateRequestStatus } from '../services/driverService'
 import Swal from 'sweetalert2'
 
@@ -59,22 +59,50 @@ export const useUdateRequestStatus = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ idRequest, action }) => updateRequestStatus(idRequest, action),
+        mutationFn: updateRequestStatus,
         onSuccess: () => {
             // se invalidan las query de las solicitudes y de las aceptadas, ademas de los viajes pendientes
             queryClient.invalidateQueries({ queryKey: ["request"] })
             queryClient.invalidateQueries({ queryKey: ["acceptedReq"] })
             queryClient.invalidateQueries({ queryKey: ["userRides"] })
+        }
+    })
+}
+
+export const useSetNotVisibleRoute = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ idUserRoute }) => setNotVisibleRoute(idUserRoute),
+        onSuccess: () => {
+            // se invalidan las query de las solicitudes y de las aceptadas, ademas de los viajes pendientes
+            queryClient.invalidateQueries({ queryKey: ["goingRoutes"] })
+            queryClient.invalidateQueries({ queryKey: ["returnRoutes"] })
+            queryClient.invalidateQueries({ queryKey: ["userRoutes"] })
         },
         onError: (error) => {
             // si falla le notificamos al usuario con los mensajes del backend
             Swal.fire({
                 title: "Error",
-                text: error.message || "Ocurrió un problema al aceptar/rechazar la solicitud.",
+                text: error.message || "Ocurrió un problema querer eliminar tu ruta.",
                 icon: "error",
                 confirmButtonText: "Cerrar"
             })
-            console.error("Error al hacer el refetch de las solicitudes de los conductores: ", error)
+            console.error("Error al hacer una eliminacion de ruta: ", error)
+        }
+    })
+}
+
+export const useConfirmRide = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: confirmRide,
+        onSuccess: () => {
+            // se invalidan las query de las solicitudes y de las aceptadas, ademas de los viajes pendientes
+            queryClient.invalidateQueries({ queryKey: ["request"] })
+            queryClient.invalidateQueries({ queryKey: ["acceptedReq"] })
+            queryClient.invalidateQueries({ queryKey: ["userRides"] })
         }
     })
 }

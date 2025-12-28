@@ -7,7 +7,7 @@
 
 /* TITULOS */
 .title {
-  background: #105abc44;
+  background: linear-gradient(90deg, #105abc44 0%, #ccd7e246 100%);
   text-align: center;
   padding: 10px;
   color: #7a8189;
@@ -167,7 +167,7 @@
   --width: 100px;
   --height: 35px;
   --tooltip-height: 35px;
-  --tooltip-width: 170px;
+  --tooltip-width: 110px;
   --gap-between-tooltip-to-button: 18px;
   --button-color: #7099f0;
   --tooltip-color: #dddddd;
@@ -276,11 +276,12 @@
 
 /* FEED BACK */
 .feedback-wrapper {
-  height: 600px;
+  height: 45vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 7rem;
+  gap: 1.2rem;
+  background-color: #fafafa;
 }
 
 .image-feedback {
@@ -404,226 +405,4 @@
 .rides-days {
   text-align: center;
   text-transform: capitalize;
-}
-
-/* BOTON DE ELIMINAR EN TABLA */
-.users-table-driver {
-  border-collapse: collapse;
-  width: 80%;
-}
-
-.users-table-driver tbody tr {
-  position: relative;
-}
-
-/* Aplicar el efecto directamente al td */
-.users-table-driver tbody tr td:first-child {
-  position: relative;
-  padding: 10px;
-  padding-left: 14px;
-  overflow: hidden;
-}
-
-/* línea roja lateral que se expande al hacer hover */
-.users-table-driver tbody tr td:first-child::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background-color: #ef4444;
-  transition: width 0.3s ease;
-  z-index: 1;
-}
-
-.users-table-driver tbody tr td:first-child:hover::before {
-  width: 100%;
-}
-
-.id-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  z-index: 2;
-}
-
-.id-number {
-  transition: opacity 0.3s ease;
-  color: inherit;
-}
-
-.users-table-driver tbody tr td:first-child:hover .id-number {
-  opacity: 0;
-}
-
-.delete-icon {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  color: white;
-  pointer-events: none;
-}
-
-.users-table-driver tbody tr td:first-child:hover .delete-icon {
-  opacity: 1;
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.delete-icon svg {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-}
-
-.active-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-button {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-}
-
-.button-comentarios {
-  cursor: pointer;
-}
-
-.button-comentarios-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.text-comentarios {
-  font-size: 0.9rem;
-}
-
-.icon-comentarios svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* BOTON PARA MANDAR RESPUESTA */
-.button-send-response {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  top: -40px;
-  border-radius: 36px;
-  font-weight: 600;
-  height: 40px;
-  font-size: 16px;
-  padding-inline: 20px;
-  background-color: transparent;
-  color: #6f6f6f;
-  text-transform: uppercase;
-  overflow: hidden;
-  text-align: center;
-  transition: all .25s ease-in-out;
-  z-index: 100;
-  border: none;
-  margin-right: 10%;
-}
-.button-send-response svg{
-  color: #ffffff;
-}
-
-.button-send-response:is(:hover, :focus)::before {
-  transform: translateX(0%);
-}
-
-.button-send-response-text {
-  white-space: nowrap;
-  line-height: 1.2;
-  padding-inline-end: 44px;
-  z-index: 2;
-}
-
-.button-send-response:hover {
-  color: #ffffff;
-  cursor: pointer;
-}
-
-.button-send-response::after {
-  content: '';
-  position: absolute;
-  height: calc(100% - 2px);
-  width: calc(100% - 2px);
-  border: 1px solid #7099f0;
-  border-radius: 36px;
-  z-index: 2;
-}
-
-.button-send-response::before {
-  content: "";
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  background-color: #7099f0;
-  z-index: 1;
-  left: -2px;
-  transform: translateX(90%);
-  transition: all .3s ease-out;
-}
-
-.button-send-response-icon {
-  display: inherit;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 0;
-  width: 54px;
-  height: 54px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 100%;
-  background-color: #7099f0;
-  z-index: 2;
-}
-
-.calendar-legend {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 10px;
-    align-items: center;
-    font-size: 15px;
-    margin-left: 10%;
-    margin-top: 10px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.legend-color {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-/* tus colores de rutas */
-.legend-color.entrada {
-    background-color: #8bd6ff; /* celeste */
-}
-
-.legend-color.salida {
-    background-color: #ff8ac2; /* rosa */
-}
-
-.legend-color.aprobada {
-  background-color: #c8f8a3ff;
 }

@@ -1,56 +1,61 @@
-// componentes
-import { CardRides } from "../components/cards"
+import { Calendar, momentLocalizer } from "react-big-calendar"
+import moment from "moment"
+import Swal from "sweetalert2"
+import "moment/locale/es"
+import "react-big-calendar/lib/css/react-big-calendar.css"
+
+moment.locale("es")
+const localizer = momentLocalizer(moment)
 
 const GetAllRides = ({ rides }) => {
+    const events = rides.map((ride) => ({
+        id: ride.idReq,
+        title: `Viaje: ${ride.solicitante}`,
+        start: new Date(`${ride.fechaViaje}T00:00:00`),
+        end: new Date(`${ride.fechaViaje}T23:59:59`),
+        rideData: ride
+    }))
 
-    // le damos un formato a la hora
-    const time = (timeString) => {
-        const date = new Date(timeString)
-        const hour = date.getUTCHours().toString().padStart(2, '0')
-        const min = date.getUTCMinutes().toString().padStart(2, '0')
+    const handleEventClick = (event) => {
+        Swal.fire({
+            title: "Información del viaje",
+            // usamos la clase driverName para capitalizar el nombre del solicitante y toLowerCase para pasarlo a minusculas
+            html: `
+            <style>
+                .driverName {
+                    text-transform: capitalize;
+                }
+            </style>
+            
+            <br></br> Solicitante: <strong class="driverName">${event.rideData.solicitante.toLowerCase()}</strong>  
+            <br></br> Fecha solicitada: <strong>${event.rideData.fechaSolicitada}</strong>
+            <br></br> Id de ruta: <strong>${event.rideData.idRutaDelViaje}</strong>`,
 
-        return `${hour}:${min}`
+            confirmButtonText: "Contactar pasajero",
+            showCancelButton: true,
+            cancelButtonText: "Cerrar",
+            icon: "info"
+        }).then((result) => {
+            if(result.isConfirmed) {
+                window.open(`https://teams.microsoft.com/l/chat/0/0?users=${encodeURIComponent(event.rideData.solicitanteCorreo)}&topicName=${encodeURIComponent("Viaje pendiente en Carpool")}`)
+            }
+        })
     }
 
-    // se crea un array con los dias que usaremos en la columnas
-    const orderDays = ["lunes", "martes", "miércoles", "jueves", "viernes"]
-    
     return (
         <>
-            <h2 className="title-white-reverse">MIS VIAJES PENDIENTES</h2>
-            
-            <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-start", flexWrap: "wrap", gap: "20px", padding: "20px", paddingLeft: "10%", paddingRight: "10%"}}>
-                {orderDays.map((day) => (
-                    <div key={day} style={{ display: "grid", justifyContent: "center", alignItems: "center", minWidth: "200px", flex: "1" }}>
-                        
-                        {/* titulo para cada columna con el dia */}
-                        <hr style={{ border: "none", borderTop: "2px solid #ccc", width: "100%", marginBottom: "-15px" }}/>
-                        <h3 className="rides-days">{day}</h3>
-                        <hr style={{ border: "none", borderTop: "2px solid #ccc", width: "100%", marginTop: "-10px", paddingBottom: "20px" }}/>
+            <h2 className="title">MIS VIAJES PENDIENTES</h2>
 
-                        {/* ordenamos todas los viajes por dia y por columna */}
-                        {rides[day]?.length > 0 ? (
-
-                            // si tenemos datos los llenamos con CardRides
-                            rides[day].map(ride => (
-                                <CardRides
-                                key={ride.idReq}
-                                username={ride.solicitante}
-                                idRoute={ride.idRutaDelViaje}
-                                dayRequest={ride.fechaSolicitada}
-                                startTime={time(ride.horaSalida)}
-                                arrivalTime={time(ride.horaLlegada)}
-                                routeWay={ride.tipoRuta}
-                                />
-                            ))
-
-                        ) : (
-
-                            // si no tenenmos info para el dia se le da feedback al usuario 
-                            <p style={{ textAlign: "center", fontStyle: "italic", color: "#aaa", width: "200px", height: "200px"}}>Sin viajes</p> 
-                        )}
-                    </div>
-                ))}
+            <div style={{ height: 600, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Calendar
+                localizer={localizer}
+                events={events}
+                views={["month"]}
+                defaultView="month"
+                selectable
+                onSelectSlot={handleEventClick}
+                onSelectEvent={handleEventClick}
+                style={{ height: "100%", width: "80%" }}/>
             </div>
         </>
     )

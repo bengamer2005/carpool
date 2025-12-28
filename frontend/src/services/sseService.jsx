@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import { useQueryClient } from '@tanstack/react-query'
 import { Notyf } from "notyf"
+const APIs = import.meta.env.VITE_API_URL
 
 const notyf = new Notyf({
     position: { x: "right", y: "bottom" },
@@ -23,7 +24,7 @@ const useSSEListen = (userId) => {
         }
 
         // mandamos el evento y pasamos el userId
-        const eventSource = new EventSource(`https://carpool-backend-sldk.onrender.com/sse/events?userId=${userId}`)
+        const eventSource = new EventSource(`${APIs}/sse/events?userId=${userId}`)
         eventSourceRef.current = eventSource
 
         eventSource.onmessage = (event) => {

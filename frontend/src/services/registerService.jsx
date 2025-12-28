@@ -1,10 +1,10 @@
 // aqui creamos todos los servicios utilizados en el aprtado del registro y login
-const apiUrl = import.meta.env.VITE_BACKEND_URL
+const APIs = import.meta.env.VITE_API_URL
 
 // se hace el registro del usuario
 export const Register = async ({ name, username, idRole, email, password }) => {
     try {
-        const response = await fetch(`${apiUrl}/carpool/user/register`, {
+        const response = await fetch(`${APIs}/carpool/user/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -28,7 +28,7 @@ export const Register = async ({ name, username, idRole, email, password }) => {
 
 export const Login = async ({ email, password }) => {
     try {
-        const response = await fetch(`${apiUrl}/carpool/user/login`, {
+        const response = await fetch(`${APIs}/carpool/user/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
