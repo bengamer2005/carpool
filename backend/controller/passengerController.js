@@ -94,7 +94,7 @@ const getAllReturnRoute = async (req, res) => {
                 SELECT *
                 FROM Requests
                 WHERE idUserReq = :idUser
-                AND CAST(dateRegister AS DATE) = CAST(GETDATE() AS DATE)
+                AND CAST(dayRequest AS DATE) = CAST(GETDATE() AS DATE)
             ) AS R ON R.idRoute = UserRoutes.idUserRoutes
             LEFT JOIN StatusReq ON StatusReq.idStatusReq = R.idStatusReq
             WHERE UserRoutes.idStatus = 1

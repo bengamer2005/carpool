@@ -7,7 +7,7 @@ router.get("/getUserRoute/:id", getUserRoute)
 router.put("/allRoute/disable/:id", disableAllUserRoutes)
 router.put("/route/active/:id", changeRouteStatus)
 
-router.put("/request/actions/:id", requestActions)
+router.put("/request/actions", requestActions)
 
 router.get("/request/getAll/:id", getAllUserRequest)
 router.get("/rides/getAll/:id", getAllRides)
