@@ -6,6 +6,7 @@ import AcceptedReq from "../hooks/getAllAcceptedReq"
 // componentes
 import Header from "../components/header"
 import Navbar from "../components/navbar"
+import Footer from "../components/footer"
 // servicios
 import useSSEListen from "../services/sseService"
 
@@ -29,6 +30,7 @@ const Passenger = () => {
             <Navbar/>
             <Drivers></Drivers>
             <AcceptedReq></AcceptedReq>
+            <Footer/>
         </>
     )
 }

@@ -11,6 +11,7 @@ import GetAllRides from "../hooks/getAllRides"
 import Header from "../components/header"
 import RouteForm from "../components/routeRegisterForm"
 import Navbar from "../components/navbar"
+import Footer from "../components/footer"
 // servicios
 import { reverseGeocode, geocodeAddress } from "../services/handleDirection"
 import { getAllRides } from "../services/driverService"
@@ -282,6 +283,8 @@ const Driver = () => {
                     </div>
                 </div>
             </div>
+
+            <Footer/>
         </>
     )
 }

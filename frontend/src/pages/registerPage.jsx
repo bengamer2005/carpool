@@ -5,6 +5,7 @@ import { Notyf } from "notyf"
 import { motion, AnimatePresence } from "framer-motion"
 // componentes
 import Header from "../components/header"
+import Footer from "../components/footer"
 // servicios
 import { Register, Login } from "../services/registerService"
 
@@ -215,6 +216,8 @@ const RegisterPage = () => {
                     </motion.div>
                 ) }
             </AnimatePresence>
+
+            <Footer/>
         </>
     )
 }

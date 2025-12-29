@@ -3,8 +3,6 @@ import { BrowserRouter, Route, Routes } from "react-router"
 import RegisterPage from "./pages/registerPage"
 import Driver from "./pages/driverPage"
 import Passenger from "./pages/passengerPage"
-import Prueba from "./pages/PRUEBAS"
-import ConfirmRequest from "./pages/confirmRequestPage"
 // estilos
 import "../src/styles/passengerPage.css"
 import "../src/styles/forms.css"
@@ -20,8 +18,6 @@ function App() {
         <Route path="/" element={<RegisterPage/>}/>
         <Route path="/conductor" element={<Driver/>}/>
         <Route path="/pasajero" element={<Passenger/>}/>
-        <Route path="/pruebas" element={<Prueba/>}/>
-        <Route path="/confirm-request" element={<ConfirmRequest/>}/>
       </Routes>
     </BrowserRouter>
   )
